@@ -15,7 +15,7 @@ LS of y on x; for one dependent variable
 - `b::Array`:     kx1, regression coefficients
 - `u::Array`:     Tx1, residuals y - yhat
 - `yhat::Array`:  Tx1, fitted values x*b
-- `V::Array`:     kxk matrix, covariance matrix of sqrt(T)b
+- `V::Array`:     kxk matrix, covariance matrix of b
 - `R2a::Number`:  scalar, R2 value
 
 """
@@ -27,7 +27,7 @@ function OlsFn(y,x,m=0)
     g    = x.*u
     S0   = NWFn(g,m)            #Newey-West covariance matrix
     Sxx  = -x'x/T
-    V    = inv(Sxx)'S0*inv(Sxx)
+    V    = inv(Sxx)'S0*inv(Sxx)/T
     R2a  = 1 - var(u)/var(y)
     return b,u,yhat,V,R2a
 end

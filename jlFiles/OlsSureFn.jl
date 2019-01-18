@@ -15,7 +15,7 @@ LS of y on x; for one n dependent variables, same regressors
 - `b::Array`:     n*kx1, regression coefficients
 - `u::Array`:     Txn, residuals y - yhat
 - `yhat::Array`:  Txn, fitted values x*b
-- `V::Array`:     matrix, covariance matrix of sqrt(T)vec(b)
+- `V::Array`:     matrix, covariance matrix of vec(b)
 - `R2a::Number`:  n vector, R2 value
 
 """
@@ -33,7 +33,7 @@ function OlsSureFn(y,x,m=0)
     S0    = NWFn(g,m)            #Newey-West covariance matrix
     Sxxi  = -x'x/T
     Sxx_1 = kron(Matrix(1.0I,n,n),inv(Sxxi))    #Matrix(1.0I,n,n) is identity matrix(n)
-    V     = Sxx_1 * S0 * Sxx_1
+    V     = Sxx_1 * S0 * Sxx_1/T
     R2a   = 1.0 .- var(u,dims=1)./var(y,dims=1)  #0.7 syntax
     return b,u,yhat,V,R2a
 end
