@@ -1,5 +1,5 @@
 """
-    OlsFn(y,x,m=1)
+    OlsFn(y,x,m=0)
 
 LS of y on x; for one dependent variable
 
