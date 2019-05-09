@@ -1,33 +1,68 @@
+#------------------------------------------------------------------------------
 """
-    OlsFn(y,x,m=0)
+    OlsGMFn(Y,X)
 
-LS of y on x; for one dependent variable
+LS of Y on X; for one dependent variable, Gauss-Markov assumptions
 
 # Usage
-(b,res,yhat,V,R2a) = OlsFn(y,x,m)
+(b,u,Yhat,V,R2a) = OlsGMFn(Y,X)
 
 # Input
-- `y::Array`:     Tx1, the dependent variable
-- `x::Array`:     Txk matrix of regressors (including deterministic ones)
-- `m::Int`:       scalar, bandwidth in Newey-West
+- `Y::Array`:     Tx1, the dependent variable
+- `X::Array`:     Txk matrix of regressors (including deterministic ones)
 
 # Output
 - `b::Array`:     kx1, regression coefficients
-- `u::Array`:     Tx1, residuals y - yhat
-- `yhat::Array`:  Tx1, fitted values x*b
+- `u::Array`:     Tx1, residuals Y - yhat
+- `Yhat::Array`:  Tx1, fitted values X*b
 - `V::Array`:     kxk matrix, covariance matrix of b
 - `R2a::Number`:  scalar, R2 value
 
 """
-function OlsFn(y,x,m=0)
-    T    = size(y,1)
-    b    = x\y
-    yhat = x*b
-    u    = y - yhat
-    g    = x.*u
-    S0   = NWFn(g,m)            #Newey-West covariance matrix
-    Sxx  = -x'x/T
-    V    = inv(Sxx)'S0*inv(Sxx)/T
-    R2a  = 1 - var(u)/var(y)
-    return b,u,yhat,V,R2a
+function OlsGMFn(Y,X)
+    T    = size(Y,1)
+    b    = X\Y
+    Yhat = X*b
+    u    = Y - Yhat
+    σ²   = var(u)
+    V    = inv(X'X)*σ²
+    R2a  = 1 - σ²/var(Y)
+    return b,u,Yhat,V,R2a
 end
+#------------------------------------------------------------------------------
+
+
+#------------------------------------------------------------------------------
+"""
+    OlsFn(Y,X,m=0)
+
+LS of Y on X; for one dependent variable, using Newey-West covariance matrix
+
+# Usage
+(b,u,Yhat,V,R2a) = OlsFn(Y,X,m)
+
+# Input
+- `Y::Array`:     Tx1, the dependent variable
+- `X::Array`:     Txk matrix of regressors (including deterministic ones)
+- `m::Int`:       scalar, bandwidth in Newey-West
+
+# Output
+- `b::Array`:     kx1, regression coefficients
+- `u::Array`:     Tx1, residuals Y - Yhat
+- `Yhat::Array`:  Tx1, fitted values X*b
+- `V::Array`:     kxk matrix, covariance matrix of b
+- `R2a::Number`:  scalar, R2 value
+
+"""
+function OlsFn(Y,X,m=0)
+    T    = size(Y,1)
+    b    = X\Y
+    Yhat = X*b
+    u    = Y - Yhat
+    S0   = NWFn(X.*u,m)*T          #Newey-West covariance matrix
+    Sxx  = X'X
+    V    = inv(Sxx)'S0*inv(Sxx)
+    R2a  = 1 - var(u)/var(Y)
+    return b,u,Yhat,V,R2a
+end
+#------------------------------------------------------------------------------
