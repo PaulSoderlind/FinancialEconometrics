@@ -1,21 +1,21 @@
-# Notice 
-If GitHub fails to render the notebook, then use [nbviewer](https://nbviewer.jupyter.org/). Instructions: try to open the notebook in GitHub, copy the link and paste it in the address field of nbviewer.
-
 # Introduction
 
-Julia code for a Financial Econometrics (MSc) course at UNISG. 
-
-The current version is tested on Julia 1.1.
-
-The code does not use any specialized econometrics packages, just general purpose packages (plotting, optimization, distributions,...). I believe that improves the learning of econometric methods.
-
-The .ipynb files are Julia notebooks. They use data in the Data folder and Julia functions in the jlFiles folder. The notebooks are meant to be used together with my lecture notes (the pdf file).
+This repository contains Julia code for a Financial Econometrics (MSc) course at UNISG. 
 
 
 # Instructions
 
-If you just want to see a notebook, click on it. 
+1.  Most files are jupyter notebooks. Click one of them to see it online. If GitHub fails to render the notebook, then use [nbviewer](https://nbviewer.jupyter.org/). Instructions: try to open the notebook at GitHub, copy the link and paste it in the address field of nbviewer.
 
-You use IJulia to edit and run these Julia notebooks. You can either install Julia/IJulia on your local computer (see https://github.com/JuliaLang/IJulia.jl for instructions) or use a web service (www.JuliaBox.com or https://cocalc.com). 
+2.  To download this repository, use the Download (as zip) in the Github menu. Otherwise, clone it.
 
 
+# On the Files
+
+1. ChapterNumber_Topic.ipynb are notebooks organised around different topics. The chapter numbers correspond to the lecture notes (pdf).
+
+2. The pdf file contains the lecture notes.
+
+3. The folder Data contains some data sets used in the notebooks, while the folder jlFiles contains .jl files with some functions used in the notebooks.
+
+4. The current version is tested on Julia 1.1.
