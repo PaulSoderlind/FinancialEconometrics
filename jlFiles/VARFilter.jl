@@ -3,7 +3,7 @@
 
 Create z Txn matrix from VAR model where z[t,:] = A1*z[t-1,:] +...+Ap*z[t-p,:]+ x[t,:].
 A is an nxnxp array with cat(A1,A2,...,dims=3)
-z0 is pxn initial values of z (for t=-2,t=-1,t-0 for a VAR(3))
+z0 is pxn initial values of z (for [t=-2;t=-1;t=0] for a VAR(3))
 """
 function VARFilter(x,A,z0)
     p     = size(A,3)            #lag order
