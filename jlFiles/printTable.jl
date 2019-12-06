@@ -1,14 +1,17 @@
 """
-    printTable([fh::IO],x,colNames=[],rowNames=[];width=10,prec=3,NoPrinting=false,htmlQ=false)
+    printTable([fh::IO],x,colNames=[],rowNames=[];
+               width=10,prec=3,NoPrinting=false,htmlQ=false,cell00="")
 
 Print formatted row names (1st column) column names (1st row), and data matrix (the rest).
 
 See printmat() for (width,prec)
+- `cell00::String`:  label in row 0, column 0
 
 To do: (a) allow for different n-vectors width&prec
 
 """
-function printTable(fh::IO,x,colNames=[],rowNames=[];width=10,prec=3,NoPrinting=false,htmlQ=false)
+function printTable(fh::IO,x,colNames=[],rowNames=[];
+                    width=10,prec=3,NoPrinting=false,htmlQ=false,cell00="")
 
   isempty(x) && return nothing                        #do nothing is isempty(x)
 
@@ -22,15 +25,16 @@ function printTable(fh::IO,x,colNames=[],rowNames=[];width=10,prec=3,NoPrinting=
   end
 
   rNamesWidth = maximum([length(rowNames[i]) for i = 1:length(rowNames)])  #max length of rowNames
+  rNamesWidth = max(rNamesWidth,length(cell00))
 
   if htmlQ                                             #print column names
-    cNamesStr = string("<tr><td>",rpad("",rNamesWidth),"</td>")
+    cNamesStr = string("<tr><th>",lpad(cell00,rNamesWidth),"</th>")
     for i = 1:n
       cNamesStr = string(cNamesStr,"<th>",lpad(colNames[i],width),"</th>")
     end
     cNamesStr = string(cNamesStr,"</tr>")
   else
-    cNamesStr = rpad("",rNamesWidth)                     #"" for cell 0,0
+    cNamesStr = lpad(cell00,rNamesWidth)                 #cell 0,0
     for i = 1:n                                          #create string
       cNamesStr = string(cNamesStr,lpad(colNames[i],width))
     end
@@ -59,9 +63,9 @@ function printTable(fh::IO,x,colNames=[],rowNames=[];width=10,prec=3,NoPrinting=
 
 end
                         #when fh is not supplied: printing to screen
-printTable(x,colNames=[],rowNames=[];width=10,prec=3,NoPrinting=false,htmlQ=false) =
+printTable(x,colNames=[],rowNames=[];width=10,prec=3,NoPrinting=false,htmlQ=false,cell00="") =
 printTable(stdout::IO,x,colNames,rowNames,
-                      width=width,prec=prec,NoPrinting=NoPrinting,htmlQ=htmlQ)
+                      width=width,prec=prec,NoPrinting=NoPrinting,htmlQ=htmlQ,cell00=cell00)
 #------------------------------------------------------------------------------
 
 
@@ -71,10 +75,10 @@ printTable(stdout::IO,x,colNames,rowNames,
 
 Call on printTable2 twice: to print to screen and then to an open file (IOStream)
 """
-function printTable2(fh,x,colNames=[],rowNames=[];width=10,prec=3,NoPrinting=false,htmlQ=false)
-  printTable(x,colNames,rowNames,width=width,prec=prec,NoPrinting=NoPrinting,htmlQ=htmlQ)      #to screen
+function printTable2(fh,x,colNames=[],rowNames=[];width=10,prec=3,NoPrinting=false,htmlQ=false,cell00="")
+  printTable(x,colNames,rowNames,width=width,prec=prec,NoPrinting=NoPrinting,htmlQ=htmlQ,cell00=cell00)      #to screen
   if isa(fh,IOStream) && isopen(fh)
-    printTable(fh,x,colNames,rowNames,width=width,prec=prec,NoPrinting=NoPrinting,htmlQ=htmlQ) #to file
+    printTable(fh,x,colNames,rowNames,width=width,prec=prec,NoPrinting=NoPrinting,htmlQ=htmlQ,cell00=cell00) #to file
   end
 end
 #------------------------------------------------------------------------------
