@@ -32,7 +32,7 @@ function OlsSureFn(Y,X,m=0)
     end
     S0    = NWFn(g,m)            #Newey-West covariance matrix
     Sxxi  = -X'X/T
-    Sxx_1 = kron(Matrix(1.0I,n,n),inv(Sxxi))    #Matrix(1.0I,n,n) is identity matrix(n)
+    Sxx_1 = kron(I(n),inv(Sxxi))
     V     = Sxx_1 * S0 * Sxx_1/T
     R2a   = 1.0 .- var(u,dims=1)./var(Y,dims=1)
     return b,u,Yhat,V,R2a
