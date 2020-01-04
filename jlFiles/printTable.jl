@@ -2,12 +2,29 @@
     printTable([fh::IO],x,colNames=[],rowNames=[];
                width=10,prec=3,NoPrinting=false,htmlQ=false,cell00="")
 
-Print formatted row names (1st column) column names (1st row), and data matrix (the rest).
+Print formatted table with row names (1st column) column names (1st row), and data matrix (the rest).
 
-See printmat() for (width,prec)
-- `cell00::String`:  label in row 0, column 0
 
-To do: (a) allow for different n-vectors width&prec
+# Input
+- `fh::IO`:           (optional) file handle. If not supplied, prints to screen
+- `x::Array`:         string, date or array to print
+- `width::Int`:       (keyword) scalar, width of printed cells. [10]
+- `prec::Int`:        (keyword) scalar, precision of printed cells. [3]
+- `NoPrinting::Bool`: (keyword) bool, true: no printing, just return formatted string [false]
+- `hmtlQ::Bool`:      (keyword) bool, true: format as htmlQ <td>cells</td> [false]
+- `cell00::String`:   (keyword) string, for row 0, column 0
+
+# Output
+- `str::String`:      (if NoPrinting) string, (otherwise nothing)
+
+# Example
+```
+xA = [1 "ab" "abc"; "ccc" 3.14 missing]
+printTable(xA,colNames,["1";"4"],width=12,prec=2)
+```
+
+# Uses
+- printmat
 
 """
 function printTable(fh::IO,x,colNames=[],rowNames=[];
