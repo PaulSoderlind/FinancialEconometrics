@@ -19,12 +19,12 @@ function NWFn(g0,m=0)
   T = size(g0,1)                    #g0 is Txq
   m = min(m,T-1)                    #number of lags
 
-  g = g0 .- mean(g0,dims=1)  #Normalizing to Eg=0, 0.7 syntax
+  g = g0 .- mean(g0,dims=1)         #normalizing to Eg=0
 
   S = g'g/T                         #(qxT)*(Txq)
   for s = 1:m
-    Gamma_s = g[s+1:T,:]'g[1:T-s,:]/T   #same as Sum[g(t)*g(t-s)',t=s+1,T]
-    S       = S  +  ( 1 - s/(m+1) ) * (Gamma_s + Gamma_s')
+    Γ_s = g[s+1:T,:]'g[1:T-s,:]/T   #same as Sum[g(t)*g(t-s)',t=s+1,T]
+    S   = S  +  (1 - s/(m+1))*(Γ_s + Γ_s')
   end
 
   return S
