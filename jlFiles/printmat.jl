@@ -1,16 +1,16 @@
 #------------------------------------------------------------------------------
 """
-    printmat([fh::IO],x;width=10,prec=3,NoPrinting=false,htmlQ=false)
+    printmat([fh::IO],x;width=10,prec=3,NoPrinting=false,StringFmt="")
 
 Print all elements of matrix with predefined formatting.
 
 # Input
-- `fh::IO`:           (optional) file handle. If not supplied, prints to screen
-- `x::Array`:         string, date or array to print
-- `width::Int`:       (keyword) scalar, width of printed cells. [10]
-- `prec::Int`:        (keyword) scalar, precision of printed cells. [3]
-- `NoPrinting::Bool`: (keyword) bool, true: no printing, just return formatted string [false]
-- `hmtlQ::Bool`:      (keyword) bool, true: format as htmlQ <td>cells</td> [false]
+- `fh::IO`:            (optional) file handle. If not supplied, prints to screen
+- `x::Array`:          string, date or array to print
+- `width::Int`:        (keyword) scalar, width of printed cells
+- `prec::Int`:         (keyword) scalar, precision of printed cells
+- `NoPrinting::Bool`:  (keyword) bool, true: no printing, just return formatted string
+- `StringFmt::String`: (keyword) string, "", "html", "csv"
 
 # Output
 - str         (if NoPrinting) string, (otherwise nothing)
@@ -29,7 +29,7 @@ Print all elements of matrix with predefined formatting.
 Paul.Soderlind@unisg.ch
 
 """
-function printmat(fh::IO,x;width=10,prec=3,NoPrinting=false,htmlQ=false)
+function printmat(fh::IO,x;width=10,prec=3,NoPrinting=false,StringFmt="")
 
   if isa(x,Union{String,Date,DateTime,Missing})  #eg. a single Date
     str = string(lpad(x,width),"\n")
@@ -52,18 +52,13 @@ function printmat(fh::IO,x;width=10,prec=3,NoPrinting=false,htmlQ=false)
 
   iob = IOBuffer()
   for i = 1:m                #loop over lines
-    for j = 1:n                #loop over columns
-      if isa(x[i,j],AbstractFloat)        #Float
-        write(iob,fmtNumPs(x[i,j],width,prec,"right",htmlQ))
-      elseif isa(x[i,j],Bool)             #Bool, BitArrays
-        htmlQ ? write(iob,"<td>",lpad(x[i,j]+0,width),"</td>") : write(iob,lpad(x[i,j]+0,width))
-      elseif isa(x[i,j],Nothing)          #Nothing
-        htmlQ ? write(iob,"<td>",lpad("",width),"</td>") : write(iob,lpad("",width))
-      elseif isa(x[i,j],String)           #String, left justified
-        htmlQ ? write(iob,"<td>",rpad(x[i,j],width),"</td>") : write(iob,rpad(x[i,j],width))
-      else                                #other types (Integer,Missing,Date,...)
-        htmlQ ? write(iob,"<td>",lpad(x[i,j],width),"</td>") : write(iob,lpad(x[i,j],width))
-      end
+    for j = 1:n-1                #loop over columns 1:n-1
+      writeElementPs(iob,x,i,j,width,prec,StringFmt)
+    end
+    if StringFmt == "csv"                         #last (n) column
+      writeElementPs(iob,x,i,n,width,prec,"")     #no , at end of line
+    else
+      writeElementPs(iob,x,i,n,width,prec,StringFmt)
     end
     write(iob,"\n")            #newline
   end
@@ -78,27 +73,71 @@ function printmat(fh::IO,x;width=10,prec=3,NoPrinting=false,htmlQ=false)
 
 end
                   #when fh is not supplied: printing to screen
-printmat(x;width=10,prec=3,NoPrinting=false,htmlQ=false) = printmat(stdout::IO,
-         x,width=width,prec=prec,NoPrinting=NoPrinting,htmlQ=htmlQ)
+printmat(x;width=10,prec=3,NoPrinting=false,StringFmt="") = printmat(stdout::IO,
+         x,width=width,prec=prec,NoPrinting=NoPrinting,StringFmt=StringFmt)
 #------------------------------------------------------------------------------
 
 
 #------------------------------------------------------------------------------
 """
-    fmtNumPs(z,width=10,prec=2,justify="right",htmlQ=false)
+    printmat2
 
-Formats a scalar and creates a string of it.
+Call on printmat twice: to print to screen and then to an open file (IOStream)
+"""
+function printmat2(fh,x;width=10,prec=3,NoPrinting=false,StringFmt="")
+  printmat(x,width=width,prec=prec,NoPrinting=NoPrinting,StringFmt=StringFmt)       #to screen
+  if isa(fh,IOStream) && isopen(fh)
+    printmat(fh,x,width=width,prec=prec,NoPrinting=NoPrinting,StringFmt=StringFmt)  #to file
+  end
+end
+#------------------------------------------------------------------------------
+
+
+#------------------------------------------------------------------------------
+"""
+    writeElementPs(iob,x,i,j,width,prec,StringFmt)
+
+Writes one element to iob, formatting depends on type
+"""
+function writeElementPs(iob,x,i,j,width,prec,StringFmt)
+
+  if isa(x[i,j],AbstractFloat)         #Float
+    write(iob,fmtNumPs(x[i,j],width,prec,"right",StringFmt))
+  elseif isa(x[i,j],Union{Int,String}) #Int, String
+    write(iob,fmtNumPs(x[i,j],width,0,"right",StringFmt))
+  elseif isa(x[i,j],Bool)              #Bool, BitArrays, as 0/1, left
+    write(iob,fmtNumPs(x[i,j]+0,width,0,"right",StringFmt))
+  elseif isa(x[i,j],Nothing)           #Nothing, as ""
+    write(iob,fmtNumPs("",width,0,"right",StringFmt))
+  else                                 #other types (Missing,Date,...), right
+    write(iob,fmtNumPs(x[i,j],width,0,"right",StringFmt))
+  end
+
+  return nothing
+ end
+#------------------------------------------------------------------------------
+
+
+#------------------------------------------------------------------------------
+"""
+    fmtNumPs(z,width=10,prec=2,justify="right",StringFmt="")
+
+Create a formatted string of a number. With prec=0, it can be used Bools and Strings
+
+
 
 # Remark
-The Formatting.jl package provides more elegant solutions:
-fmt  = FormatSpec(string(">",width,".",prec,"f"))   #right justified, else "<"
-fmt  = FormatSpec(string(">",wid,"d"))              #for Int
-str  = Formatting.fmt(fmt1,z))
+- with prec=0, the function can be used for non-floats (incl. Bools and Strings)
+- The Formatting.jl package provides more elegant solutions:
+  fmt  = FormatSpec(string(">",width,".",prec,"f"))   #right justified, else "<"
+  fmt  = FormatSpec(string(">",wid,"d"))              #for Int
+  str  = Formatting.fmt(fmt1,z))
 
 """
-function fmtNumPs(z,width=10,prec=2,justify="right",htmlQ=false)
-  if prec > 0                        #if decimal number
-    z   = round(z,digits=prec)       #101.23
+function fmtNumPs(z,width=10,prec=2,justify="right",StringFmt="")
+
+  if prec > 0                                     #if decimal number
+    z   = round(z,digits=prec)                    #101.23
     str = split(string(z),'.')
     if length(str) > 1
       strR  = string(".",rpad(str[2],prec,"0"))   #.23
@@ -107,18 +146,24 @@ function fmtNumPs(z,width=10,prec=2,justify="right",htmlQ=false)
       strLR = string(z)
     end
   else
-    if typeof(z) <: AbstractFloat                  #Floats
-      z = round(Int,z)
-    end
-    strLR = string(z)
+    isa(z,AbstractFloat) && (z = round(Int,z))    #for Floats
+    strLR = string(z)                             #
   end
-  if justify == "left"
+
+  if justify == "left"                            #justification
     strLR = rpad(strLR,width)
   else
     strLR = lpad(strLR,width)
   end
-  htmlQ && (strLR = string("<td>",strLR,"</td>"))
+
+  if StringFmt == "html"                          #html or csv formatting
+    strLR = string("<td>",strLR,"</td>")
+  elseif StringFmt == "csv"
+    strLR = string(strLR,",")
+  end
+
   return strLR
+
 end
 #------------------------------------------------------------------------------
 
@@ -177,21 +222,6 @@ function println2Ps(fh::IO,z...;width=10,prec=3)
   printlnPs(z...,width=width,prec=prec)              #to screen
   if isa(fh,IOStream) && isopen(fh)
     printlnPs(fh::IO,z...,width=width,prec=prec)     #to file
-  end
-end
-#------------------------------------------------------------------------------
-
-
-#------------------------------------------------------------------------------
-"""
-    printmat2
-
-Call on printmat twice: to print to screen and then to an open file (IOStream)
-"""
-function printmat2(fh,x;width=10,prec=3,NoPrinting=false,htmlQ=false)
-  printmat(x,width=width,prec=prec,NoPrinting=NoPrinting,htmlQ=htmlQ)       #to screen
-  if isa(fh,IOStream) && isopen(fh)
-    printmat(fh,x,width=width,prec=prec,NoPrinting=NoPrinting,htmlQ=htmlQ)  #to file
   end
 end
 #------------------------------------------------------------------------------
