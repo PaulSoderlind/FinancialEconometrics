@@ -18,4 +18,33 @@ This repository contains Julia code for a Financial Econometrics (MSc) course at
 
 3. The folder Data contains some data sets used in the notebooks, while the folder jlFiles contains .jl files with some functions used in the notebooks.
 
-4. The current version is tested on Julia 1.2 and 1.3.
+4. The current version is tested on Julia 1.3 and 1.4.
+
+
+# Relation to Other Julia Econometrics Codes
+
+The notebooks are closely tied to my lecture notes. The focus is on learning, so most methods are built up from scratch. For instance, to estimate a GARCH model, the notebook builds the likelihood function, calls on a routine for optimisation (for the point estimates) and then differentiation (to estimate the standard errors).
+
+See [Michael Creel's code](https://github.com/mcreel/Econometrics)
+for a similar approach (also focused on teaching)
+
+The following packages provide more convenient (and often more powerful) routines:  
+
+[GLM.jl](https://github.com/JuliaStats/GLM.jl)
+for regressions
+
+[CovarianceMatrices.jl](https://github.com/gragusa/CovarianceMatrices.jl)
+for robust (heteroskedasticity and/or autocorrelation) covariance estimates
+
+[HypothesisTests.jl](https://github.com/JuliaStats/HypothesisTests.jl)
+for testing residuals and distributions
+
+[ARCHModels.jl](https://github.com/s-broda/ARCHModels.jl)
+for estimating ARCH and GARCH models
+
+[KernelDensity.jl](https://github.com/JuliaStats/KernelDensity.jl)
+for kernel density estimation
+
+[QuantileRegressions.jl](https://github.com/pkofod/QuantileRegressions.jl)
+for quantile regressions
+
