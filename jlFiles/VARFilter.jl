@@ -10,7 +10,7 @@ function VARFilter(x,A,z0)
     p     = size(A,3)            #lag order
     (T,n) = (size(x,1),size(x,2))
     T0    = size(z0,1)
-    (p !== T0) && error("z0 must be $p x $n")
+    (p != T0) && error("z0 must be $p x $n")
 
     z     = [z0;zeros(T,n)]
     x     = [zeros(p,n);x]
