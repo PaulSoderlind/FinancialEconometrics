@@ -7,7 +7,7 @@ Print all elements of matrix with predefined formatting.
 # Input
 - `fh::IO`:            (optional) file handle. If not supplied, prints to screen
 - `x::Array`:          string, date or array to print
-- `width::Int`:        (keyword) scalar, width of printed cells
+- `width::Int`:        (keyword) scalar, minimum width of printed cells
 - `prec::Int`:         (keyword) scalar, precision of printed cells
 - `NoPrinting::Bool`:  (keyword) bool, true: no printing, just return formatted string
 - `StringFmt::String`: (keyword) string, "", "html", "csv"
@@ -15,15 +15,27 @@ Print all elements of matrix with predefined formatting.
 # Output
 - str         (if NoPrinting) string, (otherwise nothing)
 
-# Examples. Try printing the following arrays:
-- x = [11 12;21 22]
-- x = Any[1 "ab"; Date(2018,10,7) 3.14]
+# Examples
+```
+x = [11 12;21 22]
+printmat(x)
+```
+```
+x = Any[1 "ab"; Date(2018,10,7) 3.14]
+printmat(x,width=20)
+```
+Can also call as
+```
+opt = Dict(:width=>10,:prec=>3,:NoPrinting=>false,:StringFmt=>"")
+printmat(x;opt...)     #notice , and ...
+```
+(not all keywords are needed)
 
-# Uses
+# Requires
+- Dates
 - fmtNumPs
 
 # To do
-- use Dict() for the options, width etc?
 
 
 Paul.Soderlind@unisg.ch
@@ -92,7 +104,7 @@ and data matrix (the rest).
 - `x::Array`:          (of numbers, dates, strings, ...) to print
 - `colNames::Array`:   of strings with column headers
 - `rowNames::Array`:   of strings with row labels
-- `width::Int`:        (keyword) scalar, width of printed cells. [10]
+- `width::Int`:        (keyword) scalar, minimum width of printed cells. [10]
 - `prec::Int`:         (keyword) scalar, precision of printed cells. [3]
 - `NoPrinting::Bool`:  (keyword) bool, true: no printing, just return formatted string [false]
 - `StringFmt::String`: (keyword) string, "", "html", "csv"
@@ -106,8 +118,15 @@ and data matrix (the rest).
 xA = [1 "ab" "abc"; "ccc" 3.14 missing]
 printTable(xA,colNames,["1";"4"],width=12,prec=2)
 ```
+Can also call as
+```
+opt = Dict(:width=>10,:prec=>3,:NoPrinting=>false,:StringFmt=>"",:cell00=>"")
+printTable(x;opt...)     #notice , and ...
+```
+(not all keywords are needed)
 
-# Uses
+# Requires
+- Dates
 - printmat
 
 """
@@ -310,21 +329,22 @@ Create a formatted string of a number. With prec=0, it can be used Bools and Str
   fmt  = FormatSpec(string(">",wid,"d"))              #for Int
   str  = Formatting.fmt(fmt1,z))
 
+# Requires
+- Dates
+
 """
 function fmtNumPs(z,width=10,prec=2,justify="right",StringFmt="")
 
-  if prec > 0                                     #if decimal number
-    z   = round(z,digits=prec)                    #101.23
-    str = split(string(z),'.')
-    if length(str) > 1
-      strR  = string(".",rpad(str[2],prec,"0"))   #.23
-      strLR = string(str[1],strR)                 #"101" * ".23"
-    else                                          #eg. NaN, missing
-      strLR = string(z)
-    end
+  if (prec > 0) && !ismissing(z) && !isnan(z)  && !isinf(z)  #example: 101.0234, prec=3
+    (z_fract,z_int) = modf(abs(z))                     #0.02339999,101.0
+    z_fractI = round(Int,exp10(prec)*z_fract)          #23
+    z_fractS = lpad(z_fractI,prec,"0")                 #"023"
+    z_intI   = round(Int,z_int)
+    strLR    = string(z_intI,".",z_fractS)             #"101.023"
+    (sign(z) < 0) && (strLR = string("-",strLR))       #fix sign, round(Int,) drops it
   else
-    isa(z,AbstractFloat) && (z = round(Int,z))    #for Floats
-    strLR = string(z)                             #
+    (isa(z,AbstractFloat) && !isnan(z) && !isinf(z)) && (z = round(Int,z))  #Float -> Int
+    strLR = string(z)
   end
 
   if justify == "left"                            #justification
@@ -363,3 +383,11 @@ function printyellow(x...)
   print("\n")
 end
 #------------------------------------------------------------------------------
+
+
+#------------------------------------------------------------------------------
+function printwhere(txt)
+  println(@__FILE__," ",@__LINE__," ",txt)
+end
+#------------------------------------------------------------------------------
+
