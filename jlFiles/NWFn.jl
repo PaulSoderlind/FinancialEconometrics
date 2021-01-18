@@ -1,32 +1,29 @@
 """
-    NWFn(g0,m=0)
+    CovNWFn(g0,m=0)
 
-Calculates covariance matrix of sqrt(T)*sample average.
-
-# Usage
-S = NWFn(g0,m)
+Calculates covariance matrix of sample average.
 
 # Input
-- `g0::Array`: Txq array of q moment conditions
-- `m:int`: scalar, number of lags to use
+- `g0::Matrix`: Txq Matrix of q moment conditions
+- `m:int`:     scalar, number of lags to use
 
 # Output
-- `S::Array`: qxq covariance matrix
+- `S::Matrix`: qxq covariance matrix(average g0)
 
 """
-function NWFn(g0,m=0)
+function CovNWFn(g0,m=0)
 
-  T = size(g0,1)                    #g0 is Txq
-  m = min(m,T-1)                    #number of lags
+    T = size(g0,1)                    #g0 is Txq
+    m = min(m,T-1)                    #number of lags
 
-  g = g0 .- mean(g0,dims=1)         #normalizing to Eg=0
+    g = g0 .- mean(g0,dims=1)         #normalizing to zero means
 
-  S = g'g/T                         #(qxT)*(Txq)
-  for s = 1:m
-    Γ_s = g[s+1:T,:]'g[1:T-s,:]/T   #same as Sum[g(t)*g(t-s)',t=s+1,T]
-    S   = S  +  (1 - s/(m+1))*(Γ_s + Γ_s')
-  end
+    S = g'g                           #(qxT)*(Txq)
+    for s = 1:m
+        Λ_s = g[s+1:T,:]'g[1:T-s,:]   #same as Sum[g_t*g_{t-s}',t=s+1,T]
+        S   = S  +  (1 - s/(m+1))*(Λ_s + Λ_s')
+    end
 
-  return S
+    return S
 
 end

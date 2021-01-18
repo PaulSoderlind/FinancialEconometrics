@@ -1,22 +1,22 @@
 """
     OlsSureFn(Y,X,m=0)
 
-LS of Y on X; for one n dependent variables, same regressors
+LS of Y on X; where Y is Txn, and X is the same for all regressions
 
 # Usage
 (b,res,Yhat,Covb,R2) = OlsSureFn(Y,X,m)
 
 # Input
-- `Y::Array`:     Txn, the n dependent variables
-- `X::Array`:     Txk matrix of regressors (including deterministic ones)
-- `m::Int`:       scalar, bandwidth in Newey-West
+- `Y::Matrix`:     Txn, the n dependent variables
+- `X::Matrix`:     Txk matrix of regressors (including deterministic ones)
+- `m::Int`:        scalar, bandwidth in Newey-West
 
 # Output
-- `b::Array`:     n*kx1, regression coefficients
-- `u::Array`:     Txn, residuals Y - Yhat
-- `Yhat::Array`:  Txn, fitted values X*b
-- `V::Array`:     matrix, covariance matrix of vec(b)
-- `R2::Number`:  n vector, R2 value
+- `b::Matrix`:     n*kx1, regression coefficients
+- `u::Matrix`:     Txn, residuals Y - Yhat
+- `Yhat::Matrix`:  Txn, fitted values X*b
+- `V::Matrix`:     covariance matrix of vec(b)
+- `R2::Vector`:    n-vector, R2 values
 
 """
 function OlsSureFn(Y,X,m=0)
@@ -34,10 +34,10 @@ function OlsSureFn(Y,X,m=0)
       g[:,vv] = X.*u[:,i]           #moment conditions for Y[:,i] regression
     end
 
-    S0    = NWFn(g,m)            #Newey-West covariance matrix
-    Sxxi  = -X'X/T
+    S0    = CovNWFn(g,m)            #Newey-West covariance matrix
+    Sxxi  = -X'X
     Sxx_1 = kron(I(n),inv(Sxxi))
-    V     = Sxx_1 * S0 * Sxx_1/T
+    V     = Sxx_1 * S0 * Sxx_1
 
     R2   = 1.0 .- var(u,dims=1)./var(Y,dims=1)
 

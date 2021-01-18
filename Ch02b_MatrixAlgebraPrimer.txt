@@ -1,1 +1,1 @@
-See the FinancialTheoryMSc repository
+See MatrixAlgebra in the Julia tutorial repository

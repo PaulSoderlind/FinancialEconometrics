@@ -12,18 +12,18 @@ This repository contains Julia code for a Financial Econometrics (MSc) course at
 
 # On the Files
 
-1. ChapterNumber_Topic.ipynb are notebooks organised around different topics. The chapter numbers correspond to the lecture notes (pdf).
+1. ChapterNumber_Topic.ipynb are notebooks organised around different topics. The chapter numbers correspond to the lecture notes (pdf), where more details are given (and the notation is explained).
 
 2. The pdf file contains the lecture notes.
 
-3. The folder Data contains some data sets used in the notebooks, while the folder jlFiles contains .jl files with some functions used in the notebooks.
+3. The folder Data contains some data sets used in the notebooks, while the folder jlFiles contains .jl files with some functions (also used in the notebooks).
 
-4. The current version is tested on Julia 1.3 and 1.4.
+4. The current version is tested on Julia 1.4 and 1.5.
 
 
 # Relation to Other Julia Econometrics Codes
 
-The notebooks are closely tied to my lecture notes. The focus is on learning, so most methods are built up from scratch. For instance, to estimate a GARCH model, the notebook builds the likelihood function, calls on a routine for optimisation (for the point estimates) and then differentiation (to estimate the standard errors).
+The notebooks are closely tied to my lecture notes. The focus is on learning, so most methods are built up from scratch. For instance, to estimate a GARCH model, the notebook builds the likelihood function, calls on a routine for optimisation (for the point estimates) and then differentiation (for the standard errors).
 
 See [Michael Creel's code](https://github.com/mcreel/Econometrics)
 for a similar approach (also focused on teaching)
@@ -47,4 +47,3 @@ for kernel density estimation
 
 [QuantileRegressions.jl](https://github.com/pkofod/QuantileRegressions.jl)
 for quantile regressions
-
