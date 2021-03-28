@@ -67,9 +67,9 @@ function OlsNWFn(Y,X,m=0)
     Yhat = X*b
     u    = Y - Yhat
 
-    S0   = CovNWFn(X.*u,m)         #Newey-West covariance matrix
+    S    = CovNWFn(X.*u,m)         #Newey-West covariance matrix
     Sxx  = X'X
-    V    = inv(Sxx)'S0*inv(Sxx)    #covariance matrix of b
+    V    = inv(Sxx)'S*inv(Sxx)     #covariance matrix of b
     R2   = 1 - var(u)/var(Y)
 
     return b, u, Yhat, V, R2

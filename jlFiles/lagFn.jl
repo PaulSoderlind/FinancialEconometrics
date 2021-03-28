@@ -1,5 +1,5 @@
 """
-    lagnFn(x,n=1)
+    lagFn(x,n=1)
 
 Create a matrix or vector of lagged values.
 
@@ -11,7 +11,7 @@ Create a matrix or vector of lagged values.
 - `z::Array`:  Txk matrix of lags
 
 """
-function lagnFn(x,n=1)
+function lagFn(x,n=1)
 
   (T,k) = (size(x,1),size(x,2))
 

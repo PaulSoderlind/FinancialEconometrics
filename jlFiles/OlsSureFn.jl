@@ -1,14 +1,15 @@
 """
-    OlsSureFn(Y,X,m=0)
+    OlsSureFn(Y,X,NWQ=false,m=0)
 
 LS of Y on X; where Y is Txn, and X is the same for all regressions
 
 # Usage
-(b,res,Yhat,Covb,R2) = OlsSureFn(Y,X,m)
+(b,res,Yhat,Covb,R2) = OlsSureFn(Y,X,NWQ,m)
 
 # Input
 - `Y::Matrix`:     Txn, the n dependent variables
 - `X::Matrix`:     Txk matrix of regressors (including deterministic ones)
+- `NWQ:Bool`:      if true, then Newey-West's covariance matrix is used, otherwise Gauss-Markov
 - `m::Int`:        scalar, bandwidth in Newey-West
 
 # Output
@@ -19,7 +20,7 @@ LS of Y on X; where Y is Txn, and X is the same for all regressions
 - `R2::Vector`:    n-vector, R2 values
 
 """
-function OlsSureFn(Y,X,m=0)
+function OlsSureFn(Y,X,NWQ=false,m=0)
 
     (T,n) = (size(Y,1),size(Y,2))
     k     = size(X,2)
@@ -34,13 +35,18 @@ function OlsSureFn(Y,X,m=0)
       g[:,vv] = X.*u[:,i]           #moment conditions for Y[:,i] regression
     end
 
-    S0    = CovNWFn(g,m)            #Newey-West covariance matrix
-    Sxxi  = -X'X
-    Sxx_1 = kron(I(n),inv(Sxxi))
-    V     = Sxx_1 * S0 * Sxx_1
+    Sxx = X'X
+    if NWQ
+        S     = CovNWFn(g,m)            #Newey-West covariance matrix
+        Sxx_1 = kron(I(n),inv(Sxx))
+        V     = Sxx_1 * S * Sxx_1
+    else
+        V = kron(cov(u),inv(Sxx))      #traditional covariance matrix, Gauss-Markov
+    end
 
-    R2   = 1.0 .- var(u,dims=1)./var(Y,dims=1)
+    R2   = 1 .- var(u,dims=1)./var(Y,dims=1)
 
     return b, u, Yhat, V, R2
 
 end
+#------------------------------------------------------------------------------
