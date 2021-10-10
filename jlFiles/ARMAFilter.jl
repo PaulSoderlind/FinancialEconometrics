@@ -36,8 +36,8 @@ function ARMAFilter(x,rho=Float64[],theta=Float64[],theta0=1,z0=Float64[])
   x  = [zeros(r);x]                          #pad with zeros, clumsy but easy
   Tb = r + T
 
-  q  > 0 ? theta_ud = reverse([theta0;theta]) : theta_ud = theta0  #flip upside down
-  p > 1  ? rho_ud = reverse(rho)              : rho_ud = rho
+  theta_ud = q > 0 ? reverse([theta0;theta]) : theta0  #flip upside down
+  rho_ud   = p > 1 ? reverse(rho)            : rho
 
   Tz0 = size(z0,1)
   if isempty(z0)                             #to store output in
