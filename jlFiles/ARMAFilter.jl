@@ -11,7 +11,7 @@ DSP.filt).
 - `rho::Vector`:        (optional) p-vector of autoregression coefficients, could be []
 - `theta::Vector`:      (optional) q-vector of moving average coefficients (lag 1 to q), could be []
 - `theta0::Number`:     (optional) scalar, coefficient on x[t] in MA part, [1]
-- `z0::Vector`:         (optional) p-vector, initial values of z, eg. [z_1;z_0], []
+- `z0::Vector`:         (optional) p-vector, initial values of z, eg. [z(-1);z(0)], []
 
 # Output
 - `z::Vector`:          T-vector with output from the filter

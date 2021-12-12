@@ -1,1 +1,1 @@
-See MatrixAlgebra in the Julia tutorial repository
+See the Julia tutorial repository

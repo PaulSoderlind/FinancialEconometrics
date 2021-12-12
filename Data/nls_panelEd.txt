@@ -1,4 +1,4 @@
-%       id        year lwage           hours      age        educ     collgrad      msp     nev_mar   not_smsa    c_city     south       black       union exper      exper2     tenure    tenure2 
+        id        year lwage           hours      age        educ     collgrad      msp     nev_mar   not_smsa    c_city     south       black       union exper      exper2     tenure    tenure2 
         1         82   1.808289         38         30         12          0          1          0          0          1          0          1          1   7.666667   58.77777   7.666667   58.77777  
         1         83   1.863417         38         31         12          0          1          0          0          1          0          1          1   8.583333   73.67361   8.583333   73.67361  
         1         85   1.789367         38         33         12          0          0          0          0          1          0          1          1   10.17949    103.622   1.833333   3.361111  
