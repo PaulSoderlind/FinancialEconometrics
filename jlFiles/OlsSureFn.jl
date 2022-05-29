@@ -4,7 +4,7 @@
 LS of Y on X; where Y is Txn, and X is the same for all regressions
 
 # Usage
-(b,res,Yhat,Covb,R2) = OlsSureFn(Y,X,NWQ,m)
+(b,res,Yhat,Covb,R²) = OlsSureFn(Y,X,NWQ,m)
 
 # Input
 - `Y::Matrix`:     Txn, the n dependent variables
@@ -17,7 +17,7 @@ LS of Y on X; where Y is Txn, and X is the same for all regressions
 - `u::Matrix`:     Txn, residuals Y - Yhat
 - `Yhat::Matrix`:  Txn, fitted values X*b
 - `V::Matrix`:     covariance matrix of vec(b)
-- `R2::Vector`:    n-vector, R2 values
+- `R²::Vector`:    n-vector, R² values
 
 """
 function OlsSureFn(Y,X,NWQ=false,m=0)
@@ -29,11 +29,7 @@ function OlsSureFn(Y,X,NWQ=false,m=0)
     Yhat  = X*b
     u     = Y - Yhat
 
-    g     = zeros(T,n*k)
-    for i = 1:n
-      vv      = (1+(i-1)*k):(i*k)   #1:k,(1+k):2k,...
-      g[:,vv] = X.*u[:,i]           #moment conditions for Y[:,i] regression
-    end
+    g = repeat(X,outer=(1,n)).*repeat(u,inner=(1,k))  #[u[:,1].*X,u[:,2].*X...]
 
     Sxx = X'X
     if NWQ
@@ -44,9 +40,9 @@ function OlsSureFn(Y,X,NWQ=false,m=0)
         V = kron(cov(u),inv(Sxx))      #traditional covariance matrix, Gauss-Markov
     end
 
-    R2   = 1 .- var(u,dims=1)./var(Y,dims=1)
+    R²   = 1 .- var(u,dims=1)./var(Y,dims=1)
 
-    return b, u, Yhat, V, R2
+    return b, u, Yhat, V, R²
 
 end
 #------------------------------------------------------------------------------

@@ -3,27 +3,27 @@ function egarch11LL(par::Vector,y,x)
 
   (T,k) = (size(x,1),size(x,2))
 
-  #lns2(t) = omega + alpha*abs(u(t-1)/s[t-1]) + beta1*lns2(t-1) + gamma1*u(t-1)/s[t-1]
-  b = par[1:k]                                     #mean equation, y = x'*b
-  (omega,alpha,beta1,gamma1) = par[k+1:k+4]
+  #lnσ²(t) = ω + α*abs(u(t-1)/s[t-1]) + β*lnσ²(t-1) + γ*u(t-1)/s[t-1]
+  b         = par[1:k]                        #mean equation, y = x'*b
+  (ω,α,β,γ) = par[k+1:k+4]
   yhat = x*b
   u    = y - yhat
-  s2_0 = var(u)
+  σ²_0 = var(u)
 
-  lns2    = zeros(typeof(alpha),T)
-  lns2[1] = log(s2_0)
+  lnσ²    = zeros(typeof(α),T)
+  lnσ²[1] = log(σ²_0)
   for t = 2:T
-    s_t1   = sqrt(exp(lns2[t-1]))
-    lns2[t] = omega + alpha*abs(u[t-1])/s_t1 + beta1*lns2[t-1] + gamma1*u[t-1]/s_t1
+    σₜ₋₁     = sqrt(exp(lnσ²[t-1]))      #lagged std
+    lnσ²[t] = ω + α*abs(u[t-1])/σₜ₋₁ + β*lnσ²[t-1] + γ*u[t-1]/σₜ₋₁
   end
-  s2 = exp.(lns2)
+  σ² = exp.(lnσ²)
 
-  LL_t    = -(1/2)*log(2*pi) .- (1/2)*log.(s2) - (1/2)*(u.^2)./s2
+  LL_t    = -(1/2)*log(2*π) .- (1/2)*log.(σ²) - (1/2)*(u.^2)./σ²
   LL_t[1] = 0
 
   LL = sum(LL_t)
 
-  return LL,LL_t,s2,yhat,u
+  return LL,LL_t,σ²,yhat,u
 
 end
 #------------------------------------------------------------------------------
@@ -31,32 +31,32 @@ end
 
 #------------------------------------------------------------------------------
 
-function DccLL(par,v,s2,Qbar)
+function DccLL(par,v,σ²,Qbar)
 
   #(α,β) = par
   (α,β) = DccParTrans(par)             #restrict
 
   (T,n) = (size(v,1),size(v,2))
 
-  u = v .* sqrt.(s2)
+  u = v .* sqrt.(σ²)
 
-  Sigma = fill(NaN,(n,n,T))
+  Σ = fill(NaN,(n,n,T))
   Q_t   = copy(Qbar)                    #starting guess
   LL_t  = zeros(T)
   for t = 2:T
-    Q_t     = (1-α-β)*Qbar + α*v[t-1,:]*v[t-1,:]' + β*Q_t
-    q_t     = diag(Q_t)
-    R_t     = Q_t./sqrt.(q_t*q_t')
-    d_t     = s2[t,:]
-    Sigma_t = R_t.*sqrt.(d_t*d_t')
-    LL_t[t] = -n*log(2*pi) - logdet(Sigma_t) - u[t,:]'*inv(Sigma_t)*u[t,:]
-    Sigma[:,:,t] = Sigma_t
+    Q_t      = (1-α-β)*Qbar + α*v[t-1,:]*v[t-1,:]' + β*Q_t
+    q_t      = diag(Q_t)
+    R_t      = Q_t./sqrt.(q_t*q_t')
+    d_t      = σ²[t,:]
+    Σ_t      = R_t.*sqrt.(d_t*d_t')
+    LL_t[t]  = -n*log(2*π) - logdet(Σ_t) - u[t,:]'*inv(Σ_t)*u[t,:]
+    Σ[:,:,t] = Σ_t
   end
 
   LL_t = 0.5*LL_t
   LL = sum(LL_t)
 
-  return LL, LL_t, Sigma
+  return LL, LL_t, Σ
 
 end
 #------------------------------------------------------------------------------

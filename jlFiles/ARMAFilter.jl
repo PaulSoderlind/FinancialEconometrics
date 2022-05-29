@@ -28,7 +28,7 @@ DSP.filt).
     is handled with padding with zeros (see the code below)
 
 """
-function ARMAFilter(x,rho=Float64[],theta=Float64[],theta0=1,z0=Float64[])
+function ARMAFilter(x::Vector,rho=Float64[],theta=Float64[],theta0=1,z0=Float64[])
 
   (T,q,p) = (length(x),length(theta),length(rho))
   r       = max(p,q)                         #r obs are needed for start-up
