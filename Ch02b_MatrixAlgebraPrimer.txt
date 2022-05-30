@@ -1,1 +1,1 @@
-See the Julia tutorial repository
+See the Julia tutorial repository. The file contains code for basic matrix algebra, but also ideas for how to simplify and speed up some common computations in econometrics.
