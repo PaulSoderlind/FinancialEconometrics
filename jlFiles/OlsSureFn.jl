@@ -29,11 +29,11 @@ function OlsSureFn(Y,X,NWQ=false,m=0)
     Yhat  = X*b
     u     = Y - Yhat
 
-    g = repeat(X,outer=(1,n)).*repeat(u,inner=(1,k))  #[u[:,1].*X,u[:,2].*X...]
+    g = hKron(u,X)                     #[u[:,1].*X,u[:,2].*X...]
 
     Sxx = X'X
     if NWQ
-        S     = CovNWFn(g,m)            #Newey-West covariance matrix
+        S     = CovNWFn(g,m)           #Newey-West covariance matrix
         Sxx_1 = kron(I(n),inv(Sxx))
         V     = Sxx_1 * S * Sxx_1
     else
@@ -44,5 +44,20 @@ function OlsSureFn(Y,X,NWQ=false,m=0)
 
     return b, u, Yhat, V, R²
 
+end
+#------------------------------------------------------------------------------
+
+
+#------------------------------------------------------------------------------
+"""
+    hKron(U,X)
+
+Calculate a `Txnk` matrix where row `t` is kron(U[t,:],X[t,:])
+
+"""
+function hKron(U,X)
+  T = size(U,1)
+  Z = reshape( reshape(U,T,1,:).*X,T,: )
+  return Z
 end
 #------------------------------------------------------------------------------
