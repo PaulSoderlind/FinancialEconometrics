@@ -4,11 +4,12 @@
              width=10,prec=3,NoPrinting=false,StringFmt="",cell00="")
 
 Print all elements of a matrix (or several) with predefined formatting. It can also handle
-OffsetArrays. StringFmt = "csv" prints using a csv format.
+OffsetArrays and Tables (from Tables.jl). StringFmt = "csv" prints using a csv format.
+The `colNames` for Tables default to the `Tables.columnnames()`.
 
 # Input
 - `fh::IO`:            (optional) file handle. If not supplied, prints to screen
-- `x::Array(s)`:       (of numbers, dates, strings, ...) to print
+- `x::Array(s) or Tables`:  (of numbers, dates, strings, ...) to print
 - `colNames::Array`:   of strings with column headers
 - `rowNames::Array`:   of strings with row labels
 - `width::Int`:        (keyword) scalar, minimum width of printed cells
@@ -43,6 +44,7 @@ printmat(x;colNames=["a","b"],opt...)     #notice ; and ...
 - fmtNumPs
 
 # Notice
+- For Tables.table, the Tables.columnnames() are used for colNames (if they exist and colNames=[])
 - The prefixN and suffixN could potentially be made function inputs. This would allow
 a fairly flexible way to format tables.
 
@@ -50,10 +52,18 @@ a fairly flexible way to format tables.
 Paul.Soderlind@unisg.ch
 
 """
-function printmat(fh::IO,x...;colNames=[],rowNames=[],
+function printmat(fh::IO,x...;colNames=String[],rowNames=String[],
                   width=10,prec=3,NoPrinting=false,StringFmt="",cell00="")
 
-  isempty(x) && return nothing                         #do nothing is isempty(x)
+  isempty(x) && return nothing                         #do nothing if isempty(x)
+
+  if isdefined(Main,:Tables) && any(Tables.istable,x)  #use only if Tables.jl is loaded && x contains Table
+    xx = ntuple(i->table_to_matrix(x[i]),length(x))
+    (x,x_names) = [getindex.(xx,i) for i=1:2]
+    if isempty(colNames) && all(!isempty,x_names)
+      colNames = vcat(x_names...)                      #use Tables.columnnames if they exist for all
+    end
+  end
 
   typeTestQ = any(!=(eltype(x[1])),[eltype(z) for z in x])  #test if eltype(x[i]) differs
   if typeTestQ                                      #create matrix from tuple created by x...
@@ -86,7 +96,7 @@ function printmat(fh::IO,x...;colNames=[],rowNames=[],
   iob = IOBuffer()
 
   if !isempty(colNames)                                #print (cell00,colNames), if any
-    !isempty(cell00) ?  txt0 = string(prefixC0,cell00,suffixC0) : txt0 = ""
+    txt0 = !isempty(cell00) ? string(prefixC0,cell00,suffixC0) : ""
     print(iob,rpad(txt0,col0Width))
     for j = 1:n                                #loop over columns
       print(iob,lpad(string(prefixN[j],colNames[j],suffixN[j]),colWidth[j]))
@@ -113,7 +123,7 @@ function printmat(fh::IO,x...;colNames=[],rowNames=[],
 
 end
                         #when fh is not supplied: printing to screen
-printmat(x...;colNames=[],rowNames=[],width=10,prec=3,NoPrinting=false,StringFmt="",cell00="") =
+printmat(x...;colNames=String[],rowNames=String[],width=10,prec=3,NoPrinting=false,StringFmt="",cell00="") =
     printmat(stdout::IO,x...;colNames,rowNames,width,prec,NoPrinting,StringFmt,cell00)
 #------------------------------------------------------------------------------
 
@@ -221,6 +231,33 @@ function fmtNumPsC(fmt,z)                           #c fallback solution
     Libc.free(strp[])
   end
   return str
+end
+#------------------------------------------------------------------------------
+
+
+#------------------------------------------------------------------------------
+"""
+    table_to_matrix(tab)
+
+Help function to facilitate printing of a Tables.table. The function creates a matrix from
+a row or column table, and also extract the column names. If `tab` is an array, then it is
+just copied.
+
+# Usage with printmat
+`(x_mat,x_names) = table_to_matrix(tab)`
+
+`printmat(x_mat;colNames=x_names)`
+
+"""
+function table_to_matrix(tab)
+  if Tables.istable(tab)
+    x_mat   = Tables.matrix(tab)                        #create matrix
+    x_names = collect(Symbol,Tables.columnnames(tab))   #extract column names
+  else
+    x_mat   = tab                                       #for an array: just copy
+    x_names = Symbol[]
+  end
+  return x_mat, x_names
 end
 #------------------------------------------------------------------------------
 
