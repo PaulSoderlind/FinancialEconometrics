@@ -1,5 +1,7 @@
 #------------------------------------------------------------------------------
-function egarch11LL(par::Vector,y,x)
+function egarch11LL(par,yx)
+
+  (y,x) = (yx[:,1],yx[:,2:end])            #split up data matrix
 
   (T,k) = (size(x,1),size(x,2))
 
@@ -21,9 +23,9 @@ function egarch11LL(par::Vector,y,x)
   LL_t    = -(1/2)*log(2*π) .- (1/2)*log.(σ²) - (1/2)*(u.^2)./σ²
   LL_t[1] = 0
 
-  LL = sum(LL_t)
+  #LL = sum(LL_t)
 
-  return LL,LL_t,σ²,yhat,u
+  return LL_t,σ²,yhat,u
 
 end
 #------------------------------------------------------------------------------
@@ -31,10 +33,20 @@ end
 
 #------------------------------------------------------------------------------
 
-function DccLL(par,v,σ²,Qbar)
+"""
+    DccLL(par,data)
+
+# Input
+- `par::Vector`:  transformed parameters (a,b), will be transformed into (α,β) below
+- `data::Vector`: of arrays: v = data[1], σ² = data[2], Qbar = data[3]
+
+"""
+function DccLL(par,data)
 
   #(α,β) = par
   (α,β) = DccParTrans(par)             #restrict
+
+  (v,σ²,Qbar) = (data[1],data[2],data[3])    #unpack data
 
   (T,n) = (size(v,1),size(v,2))
 
@@ -54,9 +66,9 @@ function DccLL(par,v,σ²,Qbar)
   end
 
   LL_t = 0.5*LL_t
-  LL = sum(LL_t)
+  #LL = sum(LL_t)
 
-  return LL, LL_t, Σ
+  return LL_t, Σ
 
 end
 #------------------------------------------------------------------------------
