@@ -20,7 +20,7 @@ This repository contains Julia code for a Financial Econometrics (MSc) course at
 
 4. The plots are in png format (so GitHub can show them). If you want sharper plots, change `default(fmt = :png)` to `default(fmt = :svg)` in one of the top cells.
 
-5. The current version is tested on Julia 1.6 and 1.7.
+5. The current version is tested on Julia 1.8.
 
 
 # Relation to Other Julia Econometrics Codes
