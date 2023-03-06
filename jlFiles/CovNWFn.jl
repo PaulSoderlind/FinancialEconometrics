@@ -1,11 +1,11 @@
 """
     CovNWFn(g0,m=0)
 
-Calculates covariance matrix of sample average.
+Calculates covariance matrix of sample sum, Var(x_1+x_2+...X_T)
 
 # Input
 - `g0::Matrix`: Txq Matrix of q moment conditions
-- `m:int`:     scalar, number of lags to use
+- `m::Int`:     scalar, number of lags to use
 
 # Output
 - `S::Matrix`: qxq covariance matrix(average g0)
