@@ -1,23 +1,24 @@
+
 """
     OlsSureFn(Y,X,NWQ=false,m=0)
 
 LS of Y on X; where Y is Txn, and X is the same for all regressions
 
-# Usage
+## Usage
 (b,res,Yhat,Covb,R²) = OlsSureFn(Y,X,NWQ,m)
 
-# Input
+## Input
 - `Y::Matrix`:     Txn, the n dependent variables
 - `X::Matrix`:     Txk matrix of regressors (including deterministic ones)
 - `NWQ:Bool`:      if true, then Newey-West's covariance matrix is used, otherwise Gauss-Markov
 - `m::Int`:        scalar, bandwidth in Newey-West
 
-# Output
+## Output
 - `b::Matrix`:     n*kx1, regression coefficients
 - `u::Matrix`:     Txn, residuals Y - Yhat
 - `Yhat::Matrix`:  Txn, fitted values X*b
-- `V::Matrix`:     covariance matrix of vec(b)
-- `R²::Vector`:    n-vector, R² values
+- `V::Matrix`:     covariance matrix of θ=vec(b)
+- `R²::Matrix`:    1xn matrix, R² values
 
 """
 function OlsSureFn(Y,X,NWQ=false,m=0)
@@ -29,13 +30,13 @@ function OlsSureFn(Y,X,NWQ=false,m=0)
     Yhat  = X*b
     u     = Y - Yhat
 
-    g = hKron(u,X)                     #[u[:,1].*X,u[:,2].*X...]
-
     Sxx = X'X
+
     if NWQ
-        S     = CovNWFn(g,m)           #Newey-West covariance matrix
-        Sxx_1 = kron(I(n),inv(Sxx))
-        V     = Sxx_1 * S * Sxx_1
+        g      = hcat([X.*u[:,i] for i=1:n]...)    #hcat(X.*u[:,1],X.*u[:,2], etc)
+        S      = CovNWFn(g,m)           #Newey-West covariance matrix
+        SxxM_1 = kron(I(n),inv(Sxx))    #or
+        V      = SxxM_1 * S * SxxM_1
     else
         V = kron(cov(u),inv(Sxx))      #traditional covariance matrix, Gauss-Markov
     end
@@ -45,19 +46,3 @@ function OlsSureFn(Y,X,NWQ=false,m=0)
     return b, u, Yhat, V, R²
 
 end
-#------------------------------------------------------------------------------
-
-
-#------------------------------------------------------------------------------
-"""
-    hKron(U,X)
-
-Calculate a `Txnk` matrix where row `t` is kron(U[t,:],X[t,:])
-
-"""
-function hKron(U,X)
-  T = size(U,1)
-  Z = reshape( reshape(U,T,1,:).*X,T,: )
-  return Z
-end
-#------------------------------------------------------------------------------
