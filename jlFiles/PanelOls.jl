@@ -145,6 +145,9 @@ is valid (that is, contains no NaN/missing)
 # Example
 - `vv = FindNNPanel(y,x)` where `y` is TxN and `x` is TxKxN
 
+# Requires
+- the function `FindNNPs()`
+
 """
 function FindNNPanel(y,x)
   (T,K,N) = size(x)
@@ -157,20 +160,90 @@ end
 #------------------------------------------------------------------------------
 
 
+##------------------------------------------------------------------------------
+"""
+    PanelyxReshuffle(y,x,id)
+
+Reshuffle the dependent variable into an TxN matrix `Y` and the regressors into a
+TxKxN array `X`. This allows the `PanelOls()` function to handle autocorrelation
+and cross-sectional clustering.
+
+# Input
+- `y::VecOrMat`:    NT-vector (or Nx1 Matrix) of dependent variable
+- `x::Matrix`:      NTxK matrix with regressors
+- `id:VecOrMat`:    NT-vector (or Nx1 Matrix) of identity of cross-sectional unit
+
+# Output
+- `Y::Matrix`:       TxN
+- `X::Array`:        TxKxN
+
+"""
+function PanelyxReshuffle(y,x,id)
+
+    id_uniq   = unique(id)
+    N         = length(id_uniq)      #no. cross-sectional units
+    K         = size(x,2)            #no. regressors
+    (T,T_rem) = divrem(length(y),N)  #no. time periods
+    (T_rem != 0) && error("N*T ≠ NT")
+
+    Y = fill(NaN,T,N)                #TxN
+    X = fill(NaN,T,K,N)              #TxKxN
+
+    for i = 1:N
+        vv_i     = id .== id_uniq[i]   #rows in y which refer to individual i
+        Y[:,i]   = y[vv_i]
+        X[:,:,i] = x[vv_i,:]
+    end
+
+    return Y,X
+end
+##------------------------------------------------------------------------------
+
+
 #------------------------------------------------------------------------------
 """
-    replaceNaNinYX!(Y,X)
+    PanelyxReplaceNaN(Y,X)
 
 Replaces any rows in Y[:,i] and X[:,:,i] with zeros if there is any NaN/missing.
 Can be used to prepare an unbalanced panel data set for use in a fuction meant
-for a balanced data set. The function overwrites (Y,X) and also outputs a TxN
+for a balanced data set. The function creates (Yb,Xb) and also outputs a TxN
 matrix vvM indicating with (t,i) observations that have been zeroed out.
 
+# Requires
+- the function `FindNNPanel()`
+
 # Notice
-- The function overwrites (Y,X)
-- Recall that `NaN*0 = NaN`, so the code must explicitly set some values to 0
+- For a similar function that overwrites the existing (Y,X), see replaceNaNinYX!(Y,X).
+
 """
-function replaceNaNinYX!(Y,X)
+function PanelyxReplaceNaN(Y,X)
+
+  (Yb,Xb) = (copy(Y),copy(X))
+
+  N = size(Y,2)
+
+  vvM = FindNNPanel(Y,X)              #TxN, rows that have no NaNs/missings
+
+  for i = 1:N                         #loop over cross-section
+    vvi          = .!vvM[:,i]         #rows that should be set to 0.0
+    Yb[vvi,i]   .= 0.0
+    Xb[vvi,:,i] .= 0.0
+  end
+
+  return vvM, Yb, Xb
+
+end
+#------------------------------------------------------------------------------
+
+
+#------------------------------------------------------------------------------
+"""
+    PanelyxReplaceNaN!(Y,X)
+
+Similar to PanelyxReplaceNaN(Y,X), but overwrites the existing (Y,X) in order to
+save memory space.
+"""
+function PanelyxReplaceNaN!(Y,X)
 
   N = size(Y,2)
 
@@ -183,6 +256,86 @@ function replaceNaNinYX!(Y,X)
   end
 
   return vvM
+
+end
+#------------------------------------------------------------------------------
+
+
+#------------------------------------------------------------------------------
+"""
+    FixedEffects(y0,x0,FEType=:id)
+
+Demeans y0 and x0 by taking out individual and/or time fixed effects.
+Loops to handle unbalanced panels. Notice that if (y[t,i],x[t,:,i]) contains
+any missing value/NaN, then this oservation is excluded from the computations here
+(as it will be )
+
+
+# Input
+- `y0::Matrix`:      TxN matrix of dependent variables (possibly filled with NaNs),
+where T is the number of dates and N the number of cross-sectional units
+- `x0::Array`:       TxKxN array with regressors, notice that regressor k for
+cross-sectional unit i is in x0[:,k,i]
+- `FEType::Symbol`:  (:id,:idt, or :t) :id for individual fixed effects,
+:idt for individual and time fixed effects, :t for time fixed effects
+
+# Output
+- `y::Matrix`:
+- `x::Array`:
+- `yxAvg::Named tuple`:  yAvg_i,xAvg_i,yAvg_t,xAvg_t,yAvg,xAvg
+
+# Requires
+- the function `FindNNPanel()`
+
+# Notice
+- for TxKxN -> TxNxK (or vice versa), do permutedims(z,[1,3,2])
+
+  Paul.Soderlind@unisg.ch
+
+"""
+function FixedEffects(y0,x0,FEType=:id)
+
+  (T,N) = (size(y0,1),size(y0,2))
+  K     = size(x0,2)            #TxKxN
+
+  vvt = FindNNPanel(y0,x0)                            #use (t,i) data or not
+
+  if in(FEType,[:id,:idt])                            #individual fixed effects
+    (yAvg_i,xAvg_i) = (fill(NaN,1,N),fill(NaN,1,K,N))
+    for i = 1:N              #loop over cross section
+      vv            = vvt[:,i]
+      yAvg_i[1,i]   = mean(view(y0,vv,i))
+      xAvg_i[1,:,i] = mean(view(x0,vv,:,i),dims=1)
+    end
+  end
+
+  if in(FEType,[:idt,:t])                              #time fixed effects
+    (yAvg_t,xAvg_t) = (fill(NaN,T),fill(NaN,T,K))
+    for t = 1:T              #loop over time
+      vv          = vvt[t,:]
+      yAvg_t[t]   = mean(view(y0,t,vv))
+      xAvg_t[t,:] = mean(view(x0,t,:,vv),dims=2)
+    end
+    yAvg = mean(y0[vvt])                                  #grand mean of y
+    xAvg = permutedims([mean(x0[:,k,:][vvt]) for k=1:K])  #grand means of each of x
+  end
+
+  if FEType == :id
+    y = y0 .- yAvg_i                     #subtract fixed individual effects
+    x = x0 .- xAvg_i
+    (yAvg_t,xAvg_t,yAvg,xAvg,N_t) = (NaN,NaN,NaN,NaN,NaN)
+  elseif FEType == :idt
+    y = y0 .- yAvg_i .- yAvg_t .+ yAvg   #subtract individual and time fixed effects
+    x = x0 .- xAvg_i .- xAvg_t .+ xAvg
+  elseif FEType == :t
+    y = y0 .- yAvg_t                     #subtract time fixed effects
+    x = x0 .- xAvg_t
+    (yAvg_i,xAvg_i) = (NaN,NaN)
+  end
+
+  yxAvg = (;yAvg_i,xAvg_i,yAvg_t,xAvg_t,yAvg,xAvg,vvt)
+
+  return y, x, yxAvg
 
 end
 #------------------------------------------------------------------------------

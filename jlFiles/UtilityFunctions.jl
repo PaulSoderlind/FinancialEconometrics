@@ -109,14 +109,14 @@ Paul.Soderlind@unisg.ch
 function FindNNPs(x...;Keepdim=1)
 
   N  = length(x)
-  T     = size(x[1],Keepdim)                 #length of output
+  T  = size(x[1],Keepdim)                    #length of output
 
   xDims = maximum(ndims,x)                   #max of ndims(x[i]) for i=1:N
   dims  = setdiff(1:xDims,Keepdim)           #dimensions to check
 
   vvM = falses(T,N)
   for i = 1:N                             #loop over inputs
-    vvM[:,i] = any(z -> ismissing(z) || isnan(z),x[i],dims=dims)   #this order is important
+    vvM[:,i] = any(isunordered,x[i],dims=dims)
   end
 
   vvb = vec(.!any(vvM,dims=2))      #rows witout NaN/missing in any of the x matrices
@@ -125,3 +125,23 @@ function FindNNPs(x...;Keepdim=1)
 
 end
 #------------------------------------------------------------------------------
+
+
+##------------------------------------------------------------------------------
+"""
+
+Replaces any rows in Y and X with zeros if there is any NaN/missing in any of them.
+
+"""
+function OLSyxReplaceNaN(Y,X)
+
+  vv = FindNNPs(y0,x0)             #vv[t] = true if no missing/NaN i (y[t],x[t,:])
+
+  (Yb,Xb)     = (copy(Y),copy(X))    #set both y[t] and x[t,:] to 0 if any missing/NaN for obs. t
+  Yb[.!vv]   .=  0
+  Xb[.!vv,:] .= 0
+
+  return vv, Yb, Xb
+
+end
+##------------------------------------------------------------------------------
