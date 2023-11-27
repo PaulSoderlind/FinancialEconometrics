@@ -1,19 +1,18 @@
-
 """
     OlsSureFn(Y,X,NWQ=false,m=0)
 
 LS of Y on X; where Y is Txn, and X is the same for all regressions
 
-## Usage
+# Usage
 (b,res,Yhat,Covb,R²) = OlsSureFn(Y,X,NWQ,m)
 
-## Input
+# Input
 - `Y::Matrix`:     Txn, the n dependent variables
 - `X::Matrix`:     Txk matrix of regressors (including deterministic ones)
 - `NWQ:Bool`:      if true, then Newey-West's covariance matrix is used, otherwise Gauss-Markov
 - `m::Int`:        scalar, bandwidth in Newey-West
 
-## Output
+# Output
 - `b::Matrix`:     n*kx1, regression coefficients
 - `u::Matrix`:     Txn, residuals Y - Yhat
 - `Yhat::Matrix`:  Txn, fitted values X*b
