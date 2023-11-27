@@ -15,7 +15,7 @@ from the Information matrix, from the gradients and the sandwich approach.
 - using FiniteDiff: finite_difference_hessian as hessian, finite_difference_jacobian as jacobian
 
 """
-function MLE(LLtFun,par0,x,lower=nothing,upper=nothing)
+function MLE(LLtFun::Function,par0,x,lower=nothing,upper=nothing)
 
 
     LL_t = LLtFun(par0,x)
