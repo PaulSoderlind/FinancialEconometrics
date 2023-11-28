@@ -1,3 +1,32 @@
+##------------------------------------------------------------------------------
+function garch11LL(par,yx)
+
+    (y,x) = (yx[:,1],yx[:,2:end])
+
+    (T,k) = (size(x,1),size(x,2))
+
+    b       = par[1:k]             #mean equation, y = x'*b
+    (ω,α,β) = par[k+1:k+3]         #GARCH(1,1) equation: σ²(t) = ω + α*u(t-1)^2 + β*σ²(t-1)
+
+    yhat = x*b
+    u    = y - yhat                #fitted regression residuals
+    σ²_0 = var(u)
+
+    σ²    = zeros(typeof(α),T)     #works with ForwardDiff too
+    σ²[1] = ω + α*σ²_0 + β*σ²_0
+    for t = 2:T
+      σ²[t] = ω + α*u[t-1]^2 + β*σ²[t-1]
+    end
+
+    LL_t    = -(1/2)*log(2*π) .- (1/2)*log.(σ²) .- (1/2)*(u.^2)./σ²
+    LL_t[1] = 0.0               #effectively skip the first observation
+
+    return LL_t, σ², yhat, u
+
+end
+##------------------------------------------------------------------------------
+
+
 #------------------------------------------------------------------------------
 function egarch11LL(par,yx)
 
