@@ -7,7 +7,9 @@ This repository contains Julia code for a Financial Econometrics (MSc) course at
 
 1.  Most files are jupyter notebooks. Click one of them to see it online. If GitHub fails to render the notebook or messes up the LaTeX in the Markdown cells, then use [nbviewer](https://nbviewer.jupyter.org/). Instructions: try to open the notebook at GitHub, copy the link and paste it in the address field of nbviewer.
 
-2.  To download this repository, use the Download (as zip) in the Github menu. Otherwise, clone it.
+2. Most of the key functions are available are .jl files, and can thus be easily integrated in your own project (*almost* like a package). See the notebooks for how to use them.
+
+3.  To download this repository, use the Download (as zip) in the Github menu. Otherwise, clone it.
 
 
 # On the Files
@@ -20,12 +22,12 @@ This repository contains Julia code for a Financial Econometrics (MSc) course at
 
 4. The plots are in png format (so GitHub can show them). If you want sharper plots, change `default(fmt = :png)` to `default(fmt = :svg)` in one of the top cells.
 
-5. The current version is tested on Julia 1.8.
+5. The current version is tested on Julia 1.9.
 
 
 # Relation to Other Julia Econometrics Codes
 
-The notebooks are closely tied to my lecture notes. The focus is on learning, so most methods are built from scratch. For instance, to estimate a GARCH model, the notebook builds the likelihood function, calls on a routine for optimisation (for the point estimates) and then differentiation (for the standard errors).
+The notebooks are closely tied to my lecture notes. The focus is on learning, so most methods are built from scratch. For instance, to estimate a GARCH model, the notebook builds the likelihood function, calls on a routine for optimisation (for the point estimates) and then differentiation (for the standard errors). The code sticks close to lecture notes and makes few attempts to improve the performance. 
 
 See [Michael Creel's code](https://github.com/mcreel/Econometrics)
 for a similar approach (also focused on teaching)
