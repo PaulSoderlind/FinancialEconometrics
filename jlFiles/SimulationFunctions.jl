@@ -1,8 +1,27 @@
 ##------------------------------------------------------------------------------
 """
+    DrawBlocksFn(T,BlockSize)
+
+Draw a T-vector of indices `v` that can be used to create bootstrap residuals. 
+The indices are such that they form blocks of length `BlockSize`
+
+"""
+function DrawBlocksFn(T,BlockSize)
+    nBlocks = cld(T,BlockSize)                 #number of blocks, rounded up
+    v0      = rand(1:T,nBlocks)                #nBlocks, random starting obs of blocks
+    v       = vec(v0' .+ vec(0:BlockSize-1))   #each block in a column
+    v       = replace(z -> z>T ? z-T : z,v)    #wrap around if index > T
+    #println(v)                                #uncomment to see result
+    return v
+end
+##------------------------------------------------------------------------------
+
+
+##------------------------------------------------------------------------------
+"""
     GarchSim(T,ω,α,β)
 
-Simulate a time series of T residuals from a GARCH(1,1) process. 
+Simulate a time series of T residuals from a GARCH(1,1) process.
 
 ## Remark
 - The vector of σ² values is not exported from the function. If needed, this could easily be changed.
@@ -27,7 +46,7 @@ end
 """
     SimOLS(NSim,T,α)
 
-Simulate data for a regression model with heteroskedastic errors and then estimate both point estimates 
+Simulate data for a regression model with heteroskedastic errors and then estimate both point estimates
 and standard errors according to traditional OLS (Gauss-Markov) and White.
 
 ## Input:
