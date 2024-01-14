@@ -7,7 +7,7 @@ This repository contains Julia code for a Financial Econometrics (MSc) course at
 
 1.  Most files are jupyter notebooks. Click one of them to see it online. If GitHub fails to render the notebook or messes up the LaTeX in the Markdown cells, then use [nbviewer](https://nbviewer.jupyter.org/). Instructions: try to open the notebook at GitHub, copy the link and paste it in the address field of nbviewer.
 
-2. Most of the key functions are available as .jl files, and can thus be easily integrated in your own project (*almost* like a package). See the notebooks for how to use them.
+2. Most of the key functions are available as .jl files, and can thus be easily integrated in your own project (*almost* like a package). See the notebooks for how to use them. For the early chapters, these functions are (for learning purposes) also coded up in the notebooks. For later chapters (which more focused on applying, rather than learning, methods), the functions are only in jl files and `include`d in the notebooks.
 
 3.  To download this repository, use the Download (as zip) in the Github menu. Otherwise, clone it.
 
