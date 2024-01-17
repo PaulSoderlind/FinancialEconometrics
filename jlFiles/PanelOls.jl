@@ -4,28 +4,27 @@
 
 Pooled OLS estimation.
 
-# Input
+### Input
 - `y::Matrix`:          TxN matrix with the dependent variable, y(t,i) is for period t, individual i
 - `x::3D Array`:        TxKxN matrix with K regressors
 - `m::Int`:             (optional), scalar, number of lags in covariance estimation
 - `clust::Vector{Int}`: (optional), N vector with cluster number for each individual, [ones(N)]
 - `vvM::Matrix`:        (optional), TxN with true/false where false indicates NaN/missings in observation (t,i)
 
- # Output
+ ### Output
  - `fnOutput::NamedTuple`:   named tuple with the following elements
-      [1] theta         (K*L)x1 vector, LS estimates of regression coeefficients on kron(z,x)
-      [2] CovDK         (K*L)x(K*L) matrix, Driscoll-Kraay covariance matrix
-      [3] CovC          covariance matrix, cluster
-      [4] CovW          covariance matrix, White's
-      [5] R2            scalar, (pseudo-) R2
-      [6] yhat          TxN matrix with fitted values
-      [7] Nb            T-vector, number of obs in each period
+      1. `theta`         (K*L)x1 vector, LS estimates of regression coeefficients on kron(z,x)
+      2. `CovDK`         (K*L)x(K*L) matrix, Driscoll-Kraay covariance matrix
+      3. `CovC`          covariance matrix, cluster
+      4. `CovW`          covariance matrix, White's
+      5. `R2`            scalar, (pseudo-) R2
+      6. `yhat`          TxN matrix with fitted values
+      7. `Nb`            T-vector, number of obs in each period
 
-# Notice
+### Notice
 - for TxNxK -> TxKxN, do `x = permutedims(z,[1,3,2])`
-- for an unbalanced panel, set row t of `(y[t,i],x[t,:,i])` to zeros if there is a NaN/missing value in that row (see vvM)
-
- Paul.Soderlind@unisg.ch
+- for an unbalanced panel, set row t of `(y[t,i],x[t,:,i])` to zeros
+  if there is a NaN/missing value in that row (see vvM)
 
 """
 function PanelOls(y,x,m=0,clust=[],vvM=[])
@@ -121,7 +120,7 @@ end
     NWCovPs(omega0,omegaj,T)
 
 Calculate covariance matrix of sample average as in Newey-West from a
-KxK omega0 matrix and a KxKxm array omegaj. The latter contains m KxK
+KxK `omega0` matrix and a KxKxm array `omegaj`. The latter contains m KxK
 matrices with autocovariances.
 """
 function NWCovPs(omega0,omegaj,T)
@@ -139,13 +138,13 @@ end
 """
     FindNNPanel(y,x)
 
-Create TxN matrix with true/false indicating if observation (y[t,i],x[t,:,i])
+Create TxN matrix with true/false indicating if observation `(y[t,i],x[t,:,i])`
 is valid (that is, contains no NaN/missing)
 
-# Example
+### Example
 - `vv = FindNNPanel(y,x)` where `y` is TxN and `x` is TxKxN
 
-# Requires
+### Requires
 - the function `FindNNPs()`
 
 """
@@ -165,15 +164,15 @@ end
     PanelyxReshuffle(y,x,id)
 
 Reshuffle the dependent variable into an TxN matrix `Y` and the regressors into a
-TxKxN array `X`. This allows the `PanelOls()` function to handle autocorrelation
+TxKxN array `X`. This allows the `PaneslOls()` function to handle autocorrelation
 and cross-sectional clustering.
 
-# Input
-- `y::VecOrMat`:    NT-vector (or Nx1 Matrix) of dependent variable
+### Input
+- `y::VecOrMat`:    NT-vector (or NTx1 Matrix) of dependent variable
 - `x::Matrix`:      NTxK matrix with regressors
-- `id:VecOrMat`:    NT-vector (or Nx1 Matrix) of identity of cross-sectional unit
+- `id:VecOrMat`:    NT-vector (or NTx1 Matrix) of identity of cross-sectional unit
 
-# Output
+### Output
 - `Y::Matrix`:       TxN
 - `X::Array`:        TxKxN
 
@@ -204,15 +203,15 @@ end
 """
     PanelyxReplaceNaN(Y,X)
 
-Replaces any rows in Y[:,i] and X[:,:,i] with zeros if there is any NaN/missing.
+Replaces any rows in `Y[:,i]` and `X[:,:,i]` with zeros if there is any NaN/missing.
 Can be used to prepare an unbalanced panel data set for use in a fuction meant
 for a balanced data set. The function creates (Yb,Xb) and also outputs a TxN
 matrix vvM indicating with (t,i) observations that have been zeroed out.
 
-# Requires
+### Requires
 - the function `FindNNPanel()`
 
-# Notice
+### Notice
 - For a similar function that overwrites the existing (Y,X), see replaceNaNinYX!(Y,X).
 
 """
@@ -240,7 +239,7 @@ end
 """
     PanelyxReplaceNaN!(Y,X)
 
-Similar to PanelyxReplaceNaN(Y,X), but overwrites the existing (Y,X) in order to
+Similar to `PanelyxReplaceNaN(Y,X)`, but overwrites the existing `(Y,X)` in order to
 save memory space.
 """
 function PanelyxReplaceNaN!(Y,X)
@@ -265,32 +264,30 @@ end
 """
     FixedEffects(y0,x0,FEType=:id)
 
-Demeans y0 and x0 by taking out individual and/or time fixed effects.
-Loops to handle unbalanced panels. Notice that if (y[t,i],x[t,:,i]) contains
+Demeans `y0` and `x0` by taking out individual and/or time fixed effects.
+Loops to handle unbalanced panels. Notice that if `(y[t,i],x[t,:,i])` contains
 any missing value/NaN, then this oservation is excluded from the computations here
 (as it will be )
 
 
-# Input
+### Input
 - `y0::Matrix`:      TxN matrix of dependent variables (possibly filled with NaNs),
-where T is the number of dates and N the number of cross-sectional units
+  where T is the number of dates and N the number of cross-sectional units
 - `x0::Array`:       TxKxN array with regressors, notice that regressor k for
-cross-sectional unit i is in x0[:,k,i]
-- `FEType::Symbol`:  (:id,:idt, or :t) :id for individual fixed effects,
-:idt for individual and time fixed effects, :t for time fixed effects
+  cross-sectional unit i is in `x0[:,k,i]`
+- `FEType::Symbol`:  (`:id`,`:idt`, or `:t`) `:id` for individual fixed effects,
+  `:idt` for individual and time fixed effects, `:t` for time fixed effects
 
-# Output
+### Output
 - `y::Matrix`:
 - `x::Array`:
-- `yxAvg::Named tuple`:  yAvg_i,xAvg_i,yAvg_t,xAvg_t,yAvg,xAvg
+- `yxAvg::Named tuple`:  `yAvg_i,xAvg_i,yAvg_t,xAvg_t,yAvg,xAvg`
 
-# Requires
+### Requires
 - the function `FindNNPanel()`
 
-# Notice
+### Notice
 - for TxKxN -> TxNxK (or vice versa), do permutedims(z,[1,3,2])
-
-  Paul.Soderlind@unisg.ch
 
 """
 function FixedEffects(y0,x0,FEType=:id)

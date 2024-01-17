@@ -4,15 +4,15 @@
 Calculate ML point estimates of K parameters and three different types of standard errors:
 from the Information matrix, from the gradients and the sandwich approach.
 
-# Input
+### Input
 - `LLtFun::Function`:  name of log-likelihood function
 - `par0::Vector`:      K-vector, starting guess of the parameters
 - `x::VecOrMat`:       vector or matrix with data, unpacked (if necessary) inside LLtFun
 - `lower::Vector`:     lower bounds on the parameters, nothing or fill(-Inf,K) if no bounds
 - `upper::Vector`:     upper bounds on the parameters, nothing or fill(Inf,K) if no bounds
 
-# Requires
-- using FiniteDiff: finite_difference_hessian as hessian, finite_difference_jacobian as jacobian
+### Requires
+- `using FiniteDiff: finite_difference_hessian as hessian, finite_difference_jacobian as jacobian`
 
 """
 function MLE(LLtFun::Function,par0,x,lower=nothing,upper=nothing)

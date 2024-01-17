@@ -1,4 +1,15 @@
 ##------------------------------------------------------------------------------
+"""
+    garch11LL(par,yx)
+
+Calculate `(LL_t,σ²,yhat,u)` for regression `y = x'b + u` where
+`u` follows a GARCH(1,1) process with paramaters `(ω,α,β)`.
+
+### Input
+- `par::Vector`:  parameters, `[b;ω;α;β]`
+- `yx::Matrix`:   `[y x]` where `y` is Tx1 and `x` is Txk.
+
+"""
 function garch11LL(par,yx)
 
     (y,x) = (yx[:,1],yx[:,2:end])
@@ -28,6 +39,18 @@ end
 
 
 #------------------------------------------------------------------------------
+"""
+    egarch11LL(par,yx)
+
+  Calculate `(LL_t,σ²,yhat,u)` for regression `y = x'b + u` where
+  `u` follows an eGARCH(1,1) process with paramaters `(ω,α,β,γ)`.
+
+  ### Input
+  - `par::Vector`:  parameters, `[b;ω;α;β;γ]`
+  - `yx::Matrix`:   `[y x]` where `y` is Tx1 and `x` is Txk.
+
+
+"""
 function egarch11LL(par,yx)
 
   (y,x) = (yx[:,1],yx[:,2:end])            #split up data matrix
@@ -65,7 +88,10 @@ end
 """
     DccLL(par,data)
 
-# Input
+Calculate `(LL_t,Σ)` for a DCC model. `LL_t` is a vector with LL values
+`Σ` an (n,n,T) array with T covariance matrices (for `n` variables).
+
+### Input
 - `par::Vector`:  transformed parameters (a,b), will be transformed into (α,β) below
 - `data::Vector`: of arrays: v = data[1], σ² = data[2], Qbar = data[3]
 
@@ -102,6 +128,15 @@ function DccLL(par,data)
 end
 #------------------------------------------------------------------------------
 
+
+#------------------------------------------------------------------------------
+"""
+    DccParTrans(par)
+
+Transform the parameters so that `(α,β)` are guaranteed to be positive and
+sum to less than 1.
+
+"""
 function DccParTrans(par)
     (a,b) = par
     α      = exp(a)/(1+exp(a)+exp(b))

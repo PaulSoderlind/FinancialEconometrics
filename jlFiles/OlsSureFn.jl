@@ -1,19 +1,16 @@
 """
     OlsSureFn(Y,X,NWQ=false,m=0)
 
-LS of Y on X; where Y is Txn, and X is the same for all regressions
+LS of `Y` on `X`; where `Y` is Txn, and `X` is the same for all regressions
 
-# Usage
-(b,res,Yhat,Covb,R²) = OlsSureFn(Y,X,NWQ,m)
-
-# Input
+### Input
 - `Y::Matrix`:     Txn, the n dependent variables
 - `X::Matrix`:     Txk matrix of regressors (including deterministic ones)
 - `NWQ:Bool`:      if true, then Newey-West's covariance matrix is used, otherwise Gauss-Markov
 - `m::Int`:        scalar, bandwidth in Newey-West
 
-# Output
-- `b::Matrix`:     n*kx1, regression coefficients
+### Output
+- `b::Matrix`:     kxn, regression coefficients (one column for each `Y[:,i]`)
 - `u::Matrix`:     Txn, residuals Y - Yhat
 - `Yhat::Matrix`:  Txn, fitted values X*b
 - `V::Matrix`:     covariance matrix of θ=vec(b)
@@ -34,7 +31,7 @@ function OlsSureFn(Y,X,NWQ=false,m=0)
     if NWQ
         g      = hcat([X.*u[:,i] for i=1:n]...)    #hcat(X.*u[:,1],X.*u[:,2], etc)
         S      = CovNWFn(g,m)           #Newey-West covariance matrix
-        SxxM_1 = kron(I(n),inv(Sxx))    #or
+        SxxM_1 = kron(I(n),inv(Sxx))
         V      = SxxM_1 * S * SxxM_1
     else
         V = kron(cov(u),inv(Sxx))      #traditional covariance matrix, Gauss-Markov

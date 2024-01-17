@@ -13,9 +13,10 @@ TriangularKernel(z)   = ifelse(abs(z) < sqrt(6),(1-abs(z)/sqrt(6))/sqrt(6),0.0) 
 """
     KernDensFn(x,xGrid,h=[],KernelFun=GaussianKernel)
 
-Compute a kernel density estimate at each value of the grid `xGrid`, using the data in vector `x`. 
+Compute a kernel density estimate at each value of the grid `xGrid`, using the data in vector `x`.
 The bandwidth `h` can be specified (otherwise a default value is used). The kernel function
 defaults to a standard normal density function, but other choices are available.
+
 """
 function KernDensFn(x,xGrid,h=[],KernelFun=GaussianKernel)
 
@@ -44,19 +45,20 @@ end
 """
     KernRegFn(y,x,xGrid,h,vv = :all,DoCovb=true,KernelFun=GaussianKernel)
 
-Do kernel regression y[vv] = b(x[vv]), evaluated at xGrid vector, using bandwidth h. 
+Do kernel regression `y[vv] = b(x[vv])`, evaluated at
+each point in the `xGrid` vector, using bandwidth `h`.
 Implemented as weighted least squares (WLS), which also provide heteroskedasticity
 robust standard errors.
 
-# Input
+### Input
 - `y::Vector`:      T-vector with data for the dependent variable
 - `x::Vector`:      T-vector with data for the regressor
 - `xGrid::Vector`:  Ngrid-vector with grid points where the estimates are done
 - `vv::Symbol or Vector`: If `vv = :all`, then all data points are used, otherwise supply indices.
 - `DoCovb::Bool`:    If true, the standard error of the estimate is also calculated
-- `KernelFun::Function`: Function used as kernel. 
+- `KernelFun::Function`: Function used as kernel.
 
-# Remark
+### Remark
 - The `vv` and `DoCovb=false` options are useful for speeding up the cross-validation below.
 
 """
@@ -79,7 +81,7 @@ function KernRegFn(y,x,xGrid,h,vv = :all,DoCovb=true,KernelFun=GaussianKernel)
             StdbHat[i] = sqrt(Covb_i)
         else                               #point estimate only
             bHat[i] = w05\(w05.*y)
-        end    
+        end
     end
 
     return bHat, StdbHat
@@ -92,7 +94,8 @@ end
 """
     hRuleOfThumb(y,x)
 
-Rule of thumb bandwidth for regressing y on x.
+Rule of thumb bandwidth for regressing `y` on `x`.
+
 """
 function hRuleOfThumb(y,x)
 
@@ -111,11 +114,11 @@ end
 """
     LocalLinearRegFn(y,x,xGrid,h,vv = :all,DoCovb=true,KernelFun=GaussianKernel)
 
-Do local linear regression y = a + b(x-xGrid[i]), where both a and b will differ
-across `xGrid[i]` values. The estimates of a and their standard errors are
+Do local linear regression `y = a + b(x-xGrid[i])`, where both `a` and `b` will differ
+across `xGrid[i]` values. The estimates of `a` and their standard errors are
 exported.
 
-See KernRegrFn() for further comments
+See `KernRegrFn()` for further comments
 
 """
 function LocalLinearFn(y,x,xGrid,h,vv = :all,DoCovb=true,KernelFun=GaussianKernel)
@@ -123,7 +126,7 @@ function LocalLinearFn(y,x,xGrid,h,vv = :all,DoCovb=true,KernelFun=GaussianKerne
     if vv != :all
         (y,x) = (y[vv],x[vv])
     end
-    c = ones(length(y))          
+    c = ones(length(y))
 
     Ngrid = length(xGrid)                  #number of grid points
 
@@ -137,10 +140,10 @@ function LocalLinearFn(y,x,xGrid,h,vv = :all,DoCovb=true,KernelFun=GaussianKerne
             (b_i,_,_,Covb_i,) = OlsNWFn(w05.*y,w05.*x2,0)
             aHat[i]    = b_i[1]
             StdaHat[i] = sqrt(Covb_i[1,1])
-        else    
+        else
             b_i     = (w05.*x2)\(w05.*y)
             aHat[i] = b_i[1]
-        end    
+        end
     end
 
     return aHat, StdaHat

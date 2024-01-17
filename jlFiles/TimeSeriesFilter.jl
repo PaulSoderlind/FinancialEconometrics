@@ -6,27 +6,26 @@ Calculate ARMA(p,q) transformation of an input series ϵ. Uses explicit loop (in
 DSP.filt).
 
 
-# Input
+### Input
 - `ϵ::Vector`:      T-vector with an input series
 - `rho::Vector`:    (optional) p-vector of autoregression coefficients, could be []
 - `θ::Vector`:      (optional) q-vector of moving average coefficients (lag 1 to q), could be []
 - `θ₀::Number`:     (optional) scalar, coefficient on ϵ[t] in MA part, [1]
 - `y₀::Vector`:     (optional) p-vector, initial values of y, eg. [y(-1);y(0)], default: zeros(p)
 
-# Output
+### Output
 - `y::Vector`:      T-vector with output from the filter
 
-# Notice
-(a) The process is
-    y[t] = rho[1]*y[t-1] + ... + rho[p]*y[t-p] + θ₀*ϵ[t]  +  θ[1]*ϵ[t-1] + ... + θ[q]*ϵ[t-q]
-(b) The initial values of ϵ are assumed to be zero
-(c) To calculate impulse response functions, use ϵ = [1;zeros(T-1,1)]
-(d) There are no initial values in a pure MA and the case of q > p
-    is handled with padding with zeros (see the code below)
+### Notice
+1. The process is
+   `y[t] = rho[1]*y[t-1] + ... + rho[p]*y[t-p] + θ₀*ϵ[t]  +  θ[1]*ϵ[t-1] + ... + θ[q]*ϵ[t-q]`
+2. The initial values of `ϵ` are assumed to be zero
+3. To calculate impulse response functions, use `ϵ = [1;zeros(T-1,1)]`
+4. There are no initial values in a pure MA and the case of `q > p`
+   is handled with padding with zeros (see the code below)
 
 """
 function ARMAFilter(ϵ,rho=[],θ=[],θ₀=1,y₀=[])
-
 
   T     = length(ϵ)
   (q,p) = (length(θ),length(rho))
@@ -64,9 +63,11 @@ end
 """
     VARFilter(ϵ,A,y₀)
 
-Create y Txn matrix from VAR model where y[t,:] = A1*y[t-1,:] +...+Ap*y[t-p,:] + ϵ[t,:]
-A is an nxnxp array with cat(A1,A2,...,dims=3)
-y₀ is pxn initial values of y (for [t=-2;t=-1;t=0] for a VAR(3))
+Create y Txn matrix from VAR model where
+`y[t,:] = A1*y[t-1,:] +...+Ap*y[t-p,:] + ϵ[t,:]`
+
+A is an `nxnxp` array with `cat(A1,A2,...,dims=3)`
+`y₀` is `pxn` initial values of y (for [t=-2;t=-1;t=0] for a VAR(3))
 """
 function VARFilter(ϵ,A,y₀)
 

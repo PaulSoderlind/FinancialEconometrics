@@ -1,14 +1,14 @@
 """
     TwoSLSFn(y,x,z,NWQ=false,m=0)
 
-## Input
+### Input
 - `y::VecOrMat`:      Tx1 or T-vector of the dependent variable
 - `x::VecOrMat`:      Txk matrix (or vector) of regressors
 - `z::VecOrMat`:      TxL matrix (or vector) of instruments
 - `NWQ:Bool`:         if true, then Newey-West's covariance matrix is used, otherwise Gauss-Markov
 - `m::Int`:           scalar, bandwidth in Newey-West; 0 means White's method
 
-## Output
+### Output
 - `b::Vector`:             k-vector, regression coefficients
 - `fnOutput::NamedTuple`:  with
   - res                Tx1 or Txn matrix, residuals y - yhat
@@ -19,7 +19,7 @@
   - δ_stage1           Lxk matrix, coeffs from 1st stage x = z'δ
   - Stdδ_stage1        Lxk matrix, std of δ
 
-## Requires
+### Requires
 - Statistics, LinearAlgebra
 - CovNWFn
 

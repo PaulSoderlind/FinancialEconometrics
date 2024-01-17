@@ -3,7 +3,7 @@
     DrawBlocksFn(T,BlockSize)
 
 Draw a T-vector of indices `v` that can be used to create bootstrap residuals. 
-The indices are such that they form blocks of length `BlockSize`
+The indices are such that they form blocks of length `BlockSize`.
 
 """
 function DrawBlocksFn(T,BlockSize)
@@ -23,7 +23,7 @@ end
 
 Simulate a time series of T residuals from a GARCH(1,1) process.
 
-## Remark
+### Remark
 - The vector of σ² values is not exported from the function. If needed, this could easily be changed.
 
 """
@@ -49,7 +49,7 @@ end
 Simulate data for a regression model with heteroskedastic errors and then estimate both point estimates
 and standard errors according to traditional OLS (Gauss-Markov) and White.
 
-## Input:
+### Input
 - `NSim::Int`:    number of simulations (eg. 3000)
 - `T::Int`:       sample length (eg. 200)
 - `α::Number`:    degree of heteroskedasticity

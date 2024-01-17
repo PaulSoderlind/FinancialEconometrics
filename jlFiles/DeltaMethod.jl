@@ -8,7 +8,7 @@ Apply the delta method
 - `V::Matrix`:        Cov(β)
 - `x::VecOrMat`:      data (if any is needed)
 
-# Requires
+### Requires
 - `using FiniteDiff: finite_difference_jacobian as jacobian`
 
 """

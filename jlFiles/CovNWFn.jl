@@ -5,15 +5,15 @@ Calculates covariance matrix of sample sum (DivideByT=0), scaled average (Divide
 average (DivideByT=2).
 
 
-# Input
-- `g0::Matrix`:      Txq Matrix of q moment conditions
+### Input
+- `g0::Matrix`:      Txq Mat#rix of q moment conditions
 - `m::Int`:          number of lags to use
 - `DivideByT::Int`:  divide the result by T^DivideByT
 
-# Output
+### Output
 - `S::Matrix`: qxq covariance matrix
 
-# Remark
+### Remark
 - `DivideByT=0`: Var(x_1+x_2+...X_T)
 - `DivideByT=1`: Var((x_1+x_2+...X_T)/sqrt(T))
 - `DivideByT=2`: Var((x_1+x_2+...X_T)/T)

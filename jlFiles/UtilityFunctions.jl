@@ -2,7 +2,7 @@
 """
     ReturnStats(Re,Annfactor=252)
 
-Calculate average excess return, the std and the SR ratio - and annualise. 
+Calculate average excess return, the std and the SR ratio - and annualise.
 Returns a 3xn matrix with (annualised) `[μ;σ;SR]`, where `n=size(Re,2)`.
 """
 function ReturnStats(Re,Annfactor=252)
@@ -37,11 +37,11 @@ end
 
 Create a matrix or vector of lagged values.
 
-# Input
+### Input
 - `x::Array`: T Vector or Txk matrix
 - `n::Int`:   scalar, order of lag. For instance, 2 puts x[t-2,:] on row t
 
-# Output
+### Output
 - `z::Array`:  Txk matrix of lags
 
 """
@@ -71,7 +71,7 @@ end
 
 Remove all lines where the is a NaN/missing in any of the x arrays
 
-# Examples
+### Examples
 - `x1 = excise(x)`
 - `(y1,x1) = excise(y,x)`
 
@@ -92,14 +92,14 @@ end
 
 Find rows (if Keepdim==1) which have no NaNs missing in other dimensions (eg. in no columns).
 
-# Input
+### Input
 - `z::Array`: one or several numerical arrays
 - `Keepdim::Int`: (keyword) 1 if check rows, 2 if check columns, etc
 
-# Output
+### Output
 - `vvb::BitVector`: vector, element t is true if row (if Keepdim==1) t has no NaN or missing
 
-# Notice
+### Notice
 - Set Keepdim=2 if we should instead look for NaNs/missings along rows (and other dimensions).
 - For heterogenous arrays like `x=[x1,x1]`, use `FindNNPs(x...)`
 
@@ -129,6 +129,8 @@ end
 
 ##------------------------------------------------------------------------------
 """
+
+    OLSyxReplaceNaN(Y,X)
 
 Replaces any rows in Y and X with zeros if there is any NaN/missing in any of them.
 
@@ -170,5 +172,20 @@ function EMAFn(x,m=1)
 
     return y
 
+end
+##------------------------------------------------------------------------------
+
+
+##------------------------------------------------------------------------------
+"""
+    CovToCor(covMat)
+
+Compute correlation matrix from covariance matrix.
+
+"""
+function CovToCor(covMat)
+  d      = diag(covMat)            #variances
+  corMat = covMat./sqrt.(d*d')
+  return corMat
 end
 ##------------------------------------------------------------------------------

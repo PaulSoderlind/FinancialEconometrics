@@ -2,7 +2,7 @@
 """
     StandardiseYX(Y0,X0)
 
-Demean and make std=1 for Y and X (vector or matrices)
+Demean and make std=1 for `Y` and `X` (vector or matrices)
 
 """
 function StandardiseYX(Y0,X0)
@@ -17,7 +17,7 @@ end
 """
     RidgeRegression(Y,X,λ,β₀=0)
 
-Calculate ridge regression estimate with targetr vector β₀.
+Calculate ridge regression estimate with target vector `β₀`.
 """
 function RidgeRegression(Y,X,λ,β₀=0)
     (T,K) = (size(X,1),size(X,2))

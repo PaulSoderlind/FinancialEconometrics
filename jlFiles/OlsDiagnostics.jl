@@ -2,14 +2,15 @@
 """
     OlsR2TestFn(R²,T,df)
 
-Test of all slope coefficients. Notice that the regression must contain an intercept for R² to be useful.
+Test of all slope coefficients. Notice that the regression must contain
+an intercept for R² to be useful.
 
-## Input
+### Input
 - `R²::Number`:    R² value
 - `T::Int`:        number of observations
 - `df::Number`:    number of (non-constant) regressors
 
-## Output
+### Output
 - `RegrStat::Number`: test statistic
 - `pval::Number`:     p-value
 
@@ -29,11 +30,11 @@ end
 Test of heteroskedasticity. Notice that the regression must contain 
 an intercept for the test to be useful.
 
-## Input
+### Input
 - `u::Vector`:   T-vector, residuals
 - `x::Matrix`:   Txk, regressors
 
-## Output
+### Output
 - `RegrStat::Number`: test statistic
 - `pval::Number`:     p-value
 
@@ -67,16 +68,16 @@ end
 
 Test the autocorrelation of OLS residuals
 
-## Input:
+### Input
 - `u::Vector`:   T-vector, residuals
 - `L::Int`:      scalar, number of lags in autocorrelation and Box-Pierce test
 
-## Output
+### Output
 - `AutoCorr::Matrix`:   Lx3, autocorrelation, t-stat and p-value
 - `BoxPierce::Matrix`:  1x2, Box-Pierce statistic and p-value
 - `DW::Number`:         DW statistic
 
-## Requires
+### Requires
 - StatsBase, Distributions
 
 """

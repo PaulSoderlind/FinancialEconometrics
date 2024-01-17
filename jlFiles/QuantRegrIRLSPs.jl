@@ -1,34 +1,36 @@
 """
-    QuantRegrIRLSPs(y,x::Matrix,q=0.5;prec=1e-8,epsu=1e-6,maxiter=1000)
+    QuantRegrIRLSPs(y,x,q=0.5;prec=1e-8,epsu=1e-6,maxiter=1000)
 
-Estimate a quantile regression for quantile `q`. The outputs are the point estimates 
+Estimate a quantile regression for quantile `q`. The outputs are the point estimates
 and three different variance-covariance matrices of the estimates.
 
-# Input
+### Input
 - `y::Vector`:     T vector, dependent variable
-- `x::Matrix`:     TXK, regressors (including any constant)
+- `x::VecOrMat`:   TXK, regressors (including any constant)
 - `q::Number`:     quantile to estimate at, 0<q<1
 - `prec::Float64`: convergence criterion, 1e-8
 - `epsu::Float64`: lower bound on 1/weight, 1e-6
 - `maxiter::Int`:  maximum number of iterations, 1000
 
-# Output
+### Output
 - `theta::Vector`: K vector, estimated coefficients
 - `vcv::Matrix`:   KxK, traditional covariance matrix
 - `vcv2::Matrix`:  KxK, Powell (1991) covariance matrix
 - `vcv3::Matrix`:  KxK, Powell (1991) covariance matrix, uniform
 
-# Remarks
-- `while maximum(abs,b - b_old) > prec ...end` creates a loop that continues as long as
-the new and previous estimates differ more than `prec`. However, once the number of
-iterations exceed `maxiter` then the execution is stopped.
-- `u .= max.(u,epsu)` limits how small `u` can become which makes the algorithm
-more stable (recall: the next command is `x./u`).
+### Remarks
+
+1. `while maximum(abs,b - b_old) > prec ...end` creates a loop that continues as long as
+    the new and previous estimates differ more than `prec`. However, once the number of
+    iterations exceed `maxiter` then the execution is stopped.
+
+2. `u .= max.(u,epsu)` limits how small `u` can become which makes the algorithm
+   more stable (recall: the next command is `x./u`).
 
 """
-function QuantRegrIRLSPs(y,x::Matrix,q=0.5;prec=1e-8,epsu=1e-6,maxiter=1000)
+function QuantRegrIRLSPs(y,x,q=0.5;prec=1e-8,epsu=1e-6,maxiter=1000)
 
-  (T,K) = size(x)
+  (T,K) = (size(x,1),size(x,2))
   xw    = copy(x)
 
   (b_old,b,u,iter) = (zeros(K),fill(1e+6,K) .+ prec,zeros(T),0)

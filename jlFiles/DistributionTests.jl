@@ -1,4 +1,10 @@
 ##------------------------------------------------------------------------------
+"""
+    BeraJarqueTest(x)
+
+Calculate the BJ test for each column in a matrix. Reports `(skewness,kurtosis,BJ)`.
+
+"""
 function BeraJarqueTest(x)
     (T,n) = (size(x,1),size(x,2))    #number of columns in x
     μ = mean(x,dims=1)
@@ -17,16 +23,16 @@ end
 
 ##------------------------------------------------------------------------------
 """
-    KolSmirPs(x1,TheoryCdf::Function)
+    KolSmirTest(x1,TheoryCdf::Function)
 
 Calculate the Kolmogorov-Smirnov test
 
-## Output
+### Output
 - `KSstat::Float64`:     KS test statistic
 - `xD::Number`:          x value with the largest diff beteen empirical and theoretical cdf
 
 """
-function KolSmirPs(x1,TheoryCdf::Function)
+function KolSmirTest(x1,TheoryCdf::Function)
     T            = length(x1)
     x1Sorted     = sort(x1)
     TheoryCdf_x  = TheoryCdf.(x1Sorted)
