@@ -20,6 +20,7 @@ defaults to a standard normal density function, but other choices are available.
 """
 function KernDensFn(x,xGrid,h=[],KernelFun=GaussianKernel)
 
+    T = length(x)
     if isempty(h)
         h = 1.06*std(x)/T^0.2
     end
@@ -99,6 +100,7 @@ Rule of thumb bandwidth for regressing `y` on `x`.
 """
 function hRuleOfThumb(y,x)
 
+    T            = length(y)
     (b,res,)     = OlsGMFn(y,[x.^2 x ones(T)])
     (σ,γ)        = (std(res), b[1])
     (x_10,x_90)  = quantile(x,[0.1,0.9])             #10th and 90th percentiles

@@ -14,6 +14,9 @@ from the Information matrix, from the gradients and the sandwich approach.
 ### Requires
 - `using FiniteDiff: finite_difference_hessian as hessian, finite_difference_jacobian as jacobian`
 
+### Notice
+The `LLtFun` should take `(par,x)` as inputs and generate a T-vector `LLt` as output.
+
 """
 function MLE(LLtFun::Function,par0,x,lower=nothing,upper=nothing)
 

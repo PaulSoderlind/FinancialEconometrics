@@ -137,7 +137,7 @@ Replaces any rows in Y and X with zeros if there is any NaN/missing in any of th
 """
 function OLSyxReplaceNaN(Y,X)
 
-  vv = FindNNPs(y0,x0)             #vv[t] = true if no missing/NaN i (y[t],x[t,:])
+  vv = FindNNPs(Y,X)             #vv[t] = true if no missing/NaN i (y[t],x[t,:])
 
   (Yb,Xb)     = (copy(Y),copy(X))    #set both y[t] and x[t,:] to 0 if any missing/NaN for obs. t
   Yb[.!vv]   .=  0
