@@ -1,4 +1,3 @@
-##------------------------------------------------------------------------------
 """
     ReturnStats(Re,Annfactor=252)
 
@@ -12,10 +11,8 @@ function ReturnStats(Re,Annfactor=252)
     stats = [μ;σ;SR]
     return stats
 end
-##------------------------------------------------------------------------------
 
 
-##------------------------------------------------------------------------------
 """
     PutDataInNT(x,header)
 
@@ -28,24 +25,22 @@ function PutDataInNT(x,header)
     N      = NamedTuple{namesB}([x[:,i] for i=1:size(x,2)])       #NamedTuple with N.X, N.Y and N.Z
     return N
 end
-##------------------------------------------------------------------------------
 
 
-##------------------------------------------------------------------------------
 """
-    lagFn(x,n=1)
+    lag(x,n=1)
 
 Create a matrix or vector of lagged values.
 
 ### Input
-- `x::Array`: T Vector or Txk matrix
-- `n::Int`:   scalar, order of lag. For instance, 2 puts x[t-2,:] on row t
+- `x::VecOrMat`: T Vector or Txk matrix
+- `n::Int`:      scalar, order of lag. For instance, 2 puts x[t-2,:] on row t
 
 ### Output
 - `z::Array`:  Txk matrix of lags
 
 """
-function lagFn(x,n=1)
+function lag(x,n=1)
 
   (T,k) = (size(x,1),size(x,2))
 
@@ -62,10 +57,8 @@ function lagFn(x,n=1)
   return z
 
 end
-##------------------------------------------------------------------------------
 
 
-#------------------------------------------------------------------------------
 """
     excise(x...)
 
@@ -83,10 +76,8 @@ function excise(x...)
   (n==1) && (z = z[1])                           #if a single array in the tuple
   return z
 end
-#------------------------------------------------------------------------------
 
 
-#------------------------------------------------------------------------------
 """
     FindNNPs(x...;Keepdim=1)
 
@@ -124,59 +115,8 @@ function FindNNPs(x...;Keepdim=1)
   return vvb
 
 end
-#------------------------------------------------------------------------------
 
 
-##------------------------------------------------------------------------------
-"""
-
-    OLSyxReplaceNaN(Y,X)
-
-Replaces any rows in Y and X with zeros if there is any NaN/missing in any of them.
-
-"""
-function OLSyxReplaceNaN(Y,X)
-
-  vv = FindNNPs(Y,X)             #vv[t] = true if no missing/NaN i (y[t],x[t,:])
-
-  (Yb,Xb)     = (copy(Y),copy(X))    #set both y[t] and x[t,:] to 0 if any missing/NaN for obs. t
-  Yb[.!vv]   .=  0
-  Xb[.!vv,:] .= 0
-
-  return vv, Yb, Xb
-
-end
-##------------------------------------------------------------------------------
-
-
-##------------------------------------------------------------------------------
-"""
-    EMAFn(x,m=1)
-
-Equally weighted moving average (over the current and m-1 lagged values) of each column
-in a matrix `x`.
-
-"""
-function EMAFn(x,m=1)
-
-    (T,n) = (size(x,1),size(x,2))
-    q = m - 1                               #m=2, q=1 (avg over [t-1,t])
-
-    (q < 0) && error("q must be >= 0")
-
-    y = fill(NaN,T,n)                       #y[t] = (x[t-1] + x[t])/2
-    for t = 1:T
-        vv     = max(1,t-q):t                 #with q=2; 1:1,1:2,1:3,2:4
-        y[t,:] = sum(x[vv,:],dims=1)/m
-    end
-
-    return y
-
-end
-##------------------------------------------------------------------------------
-
-
-##------------------------------------------------------------------------------
 """
     CovToCor(covMat)
 
@@ -188,4 +128,3 @@ function CovToCor(covMat)
   corMat = covMat./sqrt.(d*d')
   return corMat
 end
-##------------------------------------------------------------------------------

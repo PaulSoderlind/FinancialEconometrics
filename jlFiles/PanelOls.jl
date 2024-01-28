@@ -1,15 +1,14 @@
-#------------------------------------------------------------------------------
 """
     PanelOls(y,x,m=0,clust=[],vvM=[])
 
 Pooled OLS estimation.
 
 ### Input
-- `y::Matrix`:          TxN matrix with the dependent variable, y(t,i) is for period t, individual i
+- `y::Matrix`:          TxN matrix with the dependent variable, `y[t,i]` is for period `t`, individual `i`
 - `x::3D Array`:        TxKxN matrix with K regressors
 - `m::Int`:             (optional), scalar, number of lags in covariance estimation
-- `clust::Vector{Int}`: (optional), N vector with cluster number for each individual, [ones(N)]
-- `vvM::Matrix`:        (optional), TxN with true/false where false indicates NaN/missings in observation (t,i)
+- `clust::Vector{Int}`: (optional), N vector with cluster number for each individual, [`ones(N)`]
+- `vvM::Matrix`:        (optional), TxN with true/false where false indicates NaN/missings in observation `(t,i)`
 
  ### Output
  - `fnOutput::NamedTuple`:   named tuple with the following elements
@@ -112,10 +111,8 @@ function PanelOls(y,x,m=0,clust=[],vvM=[])
   return fnOutput
 
 end
-#------------------------------------------------------------------------------
 
 
-#------------------------------------------------------------------------------
 """
     NWCovPs(omega0,omegaj,T)
 
@@ -131,10 +128,8 @@ function NWCovPs(omega0,omegaj,T)
   end
   return Shat
 end
-#------------------------------------------------------------------------------
 
 
-#------------------------------------------------------------------------------
 """
     FindNNPanel(y,x)
 
@@ -156,10 +151,8 @@ function FindNNPanel(y,x)
   end
   return vv
 end
-#------------------------------------------------------------------------------
 
 
-##------------------------------------------------------------------------------
 """
     PanelyxReshuffle(y,x,id)
 
@@ -196,10 +189,8 @@ function PanelyxReshuffle(y,x,id)
 
     return Y,X
 end
-##------------------------------------------------------------------------------
 
 
-#------------------------------------------------------------------------------
 """
     PanelyxReplaceNaN(Y,X)
 
@@ -232,10 +223,8 @@ function PanelyxReplaceNaN(Y,X)
   return vvM, Yb, Xb
 
 end
-#------------------------------------------------------------------------------
 
 
-#------------------------------------------------------------------------------
 """
     PanelyxReplaceNaN!(Y,X)
 
@@ -257,10 +246,8 @@ function PanelyxReplaceNaN!(Y,X)
   return vvM
 
 end
-#------------------------------------------------------------------------------
 
 
-#------------------------------------------------------------------------------
 """
     FixedEffects(y0,x0,FEType=:id)
 
@@ -287,7 +274,7 @@ any missing value/NaN, then this oservation is excluded from the computations he
 - the function `FindNNPanel()`
 
 ### Notice
-- for TxKxN -> TxNxK (or vice versa), do permutedims(z,[1,3,2])
+- for TxKxN -> TxNxK (or vice versa), do `permutedims(z,[1,3,2])`
 
 """
 function FixedEffects(y0,x0,FEType=:id)
@@ -335,4 +322,3 @@ function FixedEffects(y0,x0,FEType=:id)
   return y, x, yxAvg
 
 end
-#------------------------------------------------------------------------------

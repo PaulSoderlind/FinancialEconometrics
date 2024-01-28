@@ -1,9 +1,8 @@
-##------------------------------------------------------------------------------
 """
     IndividualDemean(y,x,id,ϑ=1)
 
 Demean `y` and `x` by individuals (cross-sectional units), assuming `y` is a NT vector
-and `x` is NTxK and both are organised as the NT-vector `id`. The code handles both
+and `x` is NTxK and both are organised according to the NT-vector `id`. The code handles both
 the case where data is organised according to id or according to time.
 
 `ϑ=1` is used for the FE estimator, but the GLS estimator uses `0<ϑ<1` (see below).
@@ -29,16 +28,15 @@ function IndividualDemean(y,x,id,ϑ=1)
     return yˣ,xˣ,ȳ,x̄
 
 end
-##------------------------------------------------------------------------------
 
 
-##------------------------------------------------------------------------------
 """
     FirstDiff(y,x,id)
 
-Calculate first differences (for each individual) of `y` and `x`. Data is assumed to be
-organised as in `IndividualDemean()`. It is important, however, that obs (i,t+1) is 
-below that of (i,t).
+Calculate first differences (for each individual) of `y` and `x`,
+assuming `y` is a NT vector and `x` is NTxK and both are
+organised according to the NT-vector `id`.
+It is important, however, that obs (i,t+1) is below that of (i,t).
 
 """
 function FirstDiff(y,x,id)
@@ -51,8 +49,8 @@ function FirstDiff(y,x,id)
 
     for i = 1:N                          #individual first-differencing, loop over individuals
         vv_i       = id .== id_uniq[i]   ##locate rows which refer to individual i
-        Δy[vv_i,:] = y[vv_i]   - lagFn(y[vv_i,:])   #y[t] -y[t-1]
-        Δx[vv_i,:] = x[vv_i,:] - lagFn(x[vv_i,:])   #x[t,:] -x[t-1,:]        
+        Δy[vv_i,:] = y[vv_i]   - lag(y[vv_i,:])   #y[t] -y[t-1]
+        Δx[vv_i,:] = x[vv_i,:] - lag(x[vv_i,:])   #x[t,:] -x[t-1,:]        
     end
 
     (Δy,Δx) = (excise(Δy),excise(Δx))          #cut out rows with NaNs
@@ -60,4 +58,3 @@ function FirstDiff(y,x,id)
     return Δy,Δx
     
 end    
-##------------------------------------------------------------------------------

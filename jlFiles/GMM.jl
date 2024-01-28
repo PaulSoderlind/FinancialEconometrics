@@ -1,4 +1,3 @@
-##------------------------------------------------------------------------------
 """
     meanV(x)
 
@@ -6,10 +5,8 @@ Calculate the sample average of each column of `x` and return a vector of them.
 
 """
 meanV(x) = vec(mean(x,dims=1));    #mean of each column, transformed into a vector
-##------------------------------------------------------------------------------
 
 
-##------------------------------------------------------------------------------
 """
     GMMExactlyIdentified(GmmMomFn::Function,x,par0,m)
 
@@ -32,7 +29,7 @@ function GMMExactlyIdentified(GmmMomFn::Function,x,par0,m)
     par1 = Sol.zero
 
     g = GmmMomFn(par1,x)        #Tx2, moment conditions
-    S = CovNWFn(g,m,1)          #variance of sqrt(T)*gbar, NW with m lags
+    S = CovNW(g,m,1)          #variance of sqrt(T)*gbar, NW with m lags
 
     D = jacobian(par->meanV(GmmMomFn(par,x)),par1)  #Numerical Jacobian
     V = inv(D'inv(S)*D)/T
@@ -41,10 +38,8 @@ function GMMExactlyIdentified(GmmMomFn::Function,x,par0,m)
     return par1, StdErr, V, S
 
 end
-##------------------------------------------------------------------------------
 
 
-##------------------------------------------------------------------------------
 """
     GMMgbarWgbar(GmmMomFn::Function,W,x,par0,m;SkipCovQ=false)
 
@@ -76,7 +71,7 @@ function GMMgbarWgbar(GmmMomFn::Function,W,x,par0,m;SkipCovQ=false)
     par1 = Optim.minimizer(Sol)
 
     g = GmmMomFn(par1,x)        #Tx2, moment conditions
-    S = CovNWFn(g,m,1)          #variance of sqrt(T)*gbar, NW with m lags
+    S = CovNW(g,m,1)          #variance of sqrt(T)*gbar, NW with m lags
 
     if SkipCovQ
         (D,V,StdErr) = (NaN,NaN,NaN)
@@ -89,10 +84,8 @@ function GMMgbarWgbar(GmmMomFn::Function,W,x,par0,m;SkipCovQ=false)
     return par1, StdErr, V, S, D
 
 end
-##------------------------------------------------------------------------------
 
 
-##------------------------------------------------------------------------------
 """
     GMMAgbar(GmmMomFn::Function,A,x,par0,m)
 
@@ -116,7 +109,7 @@ function GMMAgbar(GmmMomFn::Function,A,x,par0,m)
     par1 = Sol.zero
 
     g = GmmMomFn(par1,x)        #Tx2, moment conditions
-    S = CovNWFn(g,m,1)          #variance of sqrt(T)*gbar, NW with m lags
+    S = CovNW(g,m,1)          #variance of sqrt(T)*gbar, NW with m lags
 
     D = jacobian(par->meanV(GmmMomFn(par,x)),par1)  #Numerical Jacobian
     V = inv(A*D)*A*S*A'inv(A*D)'/T
@@ -125,4 +118,3 @@ function GMMAgbar(GmmMomFn::Function,A,x,par0,m)
     return par1, StdErr, V, S
 
 end
-##------------------------------------------------------------------------------

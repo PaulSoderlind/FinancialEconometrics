@@ -1,6 +1,5 @@
-##------------------------------------------------------------------------------
 """
-    OlsR2TestFn(R²,T,df)
+    OlsR2Test(R²,T,df)
 
 Test of all slope coefficients. Notice that the regression must contain
 an intercept for R² to be useful.
@@ -15,17 +14,15 @@ an intercept for R² to be useful.
 - `pval::Number`:     p-value
 
 """
-function OlsR2TestFn(R²,T,df)
+function OlsR2Test(R²,T,df)
     RegrStat = T*R²/(1-R²)           #R\^2[TAB]
     pval     = 1 - cdf(Chisq(df),RegrStat)    #or ccdf() to get 1-cdf()
     return RegrStat, pval
 end
-##------------------------------------------------------------------------------
 
 
-##------------------------------------------------------------------------------
 """
-    OlsWhitesTestFn(u,x)
+    OlsWhitesTest(u,x)
 
 Test of heteroskedasticity. Notice that the regression must contain 
 an intercept for the test to be useful.
@@ -39,7 +36,7 @@ an intercept for the test to be useful.
 - `pval::Number`:     p-value
 
 """
-function OlsWhitesTestFn(u,x)
+function OlsWhitesTest(u,x)
 
     (T,k) = (size(x,1),size(x,2))
 
@@ -50,7 +47,7 @@ function OlsWhitesTestFn(u,x)
         vv        = vv + 1
     end
 
-    R² = OlsGMFn(u.^2,w)[5]             #[5] picks out output 5
+    R² = OlsGM(u.^2,w)[5]             #[5] picks out output 5
     df = rank(w) - 1                    #number of independent regressors in w
 
     WhiteStat = T*R²/(1-R²)
@@ -59,12 +56,10 @@ function OlsWhitesTestFn(u,x)
     return WhiteStat, pval
 
 end
-##------------------------------------------------------------------------------
 
 
-##------------------------------------------------------------------------------
 """
-    OlsAutoCorrFn(u,L=1)
+    OlsAutoCorr(u,L=1)
 
 Test the autocorrelation of OLS residuals
 
@@ -81,7 +76,7 @@ Test the autocorrelation of OLS residuals
 - StatsBase, Distributions
 
 """
-function OlsAutoCorrFn(u,L=1)
+function OlsAutoCorr(u,L=1)
 
     T = size(u,1)
 
@@ -101,4 +96,3 @@ function OlsAutoCorrFn(u,L=1)
     return AutoCorr, BoxPierce, DWStat
 
 end
-##------------------------------------------------------------------------------

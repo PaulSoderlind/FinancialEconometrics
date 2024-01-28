@@ -1,5 +1,5 @@
 """
-    QuantRegrIRLSPs(y,x,q=0.5;prec=1e-8,epsu=1e-6,maxiter=1000)
+    QuantRegrIRLS(y,x,q=0.5;prec=1e-8,epsu=1e-6,maxiter=1000)
 
 Estimate a quantile regression for quantile `q`. The outputs are the point estimates
 and three different variance-covariance matrices of the estimates.
@@ -28,7 +28,7 @@ and three different variance-covariance matrices of the estimates.
    more stable (recall: the next command is `x./u`).
 
 """
-function QuantRegrIRLSPs(y,x,q=0.5;prec=1e-8,epsu=1e-6,maxiter=1000)
+function QuantRegrIRLS(y,x,q=0.5;prec=1e-8,epsu=1e-6,maxiter=1000)
 
   (T,K) = (size(x,1),size(x,2))
   xw    = copy(x)

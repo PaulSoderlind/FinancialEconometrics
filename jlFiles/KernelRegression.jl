@@ -1,4 +1,3 @@
-##------------------------------------------------------------------------------
 """
 Four different kernels for use with the kernel density and regression
 """
@@ -6,19 +5,17 @@ GaussianKernel(z)     = exp(-abs2(z)/2)/sqrt(2*pi)
 UniformKernel(z)      = ifelse(abs(z) < sqrt(3),1/(2*sqrt(3)),0.0)                   #[-sqrt(3),sqrt(3)]
 EpanechnikovKernel(z) = ifelse(abs(z) < sqrt(5),(1-abs2(z)/5)*3/(4*sqrt(5)),0.0)     #[-sqrt(5),sqrt(5)]
 TriangularKernel(z)   = ifelse(abs(z) < sqrt(6),(1-abs(z)/sqrt(6))/sqrt(6),0.0)      #[-sqrt(6),sqrt(6)]
-##------------------------------------------------------------------------------
 
 
-##------------------------------------------------------------------------------
 """
-    KernDensFn(x,xGrid,h=[],KernelFun=GaussianKernel)
+    KernelDensity(x,xGrid,h=[],KernelFun=GaussianKernel)
 
 Compute a kernel density estimate at each value of the grid `xGrid`, using the data in vector `x`.
 The bandwidth `h` can be specified (otherwise a default value is used). The kernel function
 defaults to a standard normal density function, but other choices are available.
 
 """
-function KernDensFn(x,xGrid,h=[],KernelFun=GaussianKernel)
+function KernelDensity(x,xGrid,h=[],KernelFun=GaussianKernel)
 
     T = length(x)
     if isempty(h)
@@ -39,12 +36,10 @@ function KernDensFn(x,xGrid,h=[],KernelFun=GaussianKernel)
   return fx, Stdfx
 
 end
-##------------------------------------------------------------------------------
 
 
-##------------------------------------------------------------------------------
 """
-    KernRegFn(y,x,xGrid,h,vv = :all,DoCovb=true,KernelFun=GaussianKernel)
+    KernelRegression(y,x,xGrid,h,vv = :all,DoCovb=true,KernelFun=GaussianKernel)
 
 Do kernel regression `y[vv] = b(x[vv])`, evaluated at
 each point in the `xGrid` vector, using bandwidth `h`.
@@ -63,7 +58,7 @@ robust standard errors.
 - The `vv` and `DoCovb=false` options are useful for speeding up the cross-validation below.
 
 """
-function KernRegFn(y,x,xGrid,h,vv = :all,DoCovb=true,KernelFun=GaussianKernel)
+function KernelRegression(y,x,xGrid,h,vv = :all,DoCovb=true,KernelFun=GaussianKernel)
 
     if vv != :all
         (y,x) = (y[vv],x[vv])
@@ -77,7 +72,7 @@ function KernRegFn(y,x,xGrid,h,vv = :all,DoCovb=true,KernelFun=GaussianKernel)
         w   = KernelFun.(zi)
         w05 = sqrt.(w)
         if DoCovb                          #point estimate and standard error
-            (b_i,_,_,Covb_i,) = OlsNWFn(w05.*y,w05,0)
+            (b_i,_,_,Covb_i,) = OlsNW(w05.*y,w05,0)
             bHat[i]    = b_i
             StdbHat[i] = sqrt(Covb_i)
         else                               #point estimate only
@@ -88,10 +83,8 @@ function KernRegFn(y,x,xGrid,h,vv = :all,DoCovb=true,KernelFun=GaussianKernel)
     return bHat, StdbHat
 
 end
-##------------------------------------------------------------------------------
 
 
-##------------------------------------------------------------------------------
 """
     hRuleOfThumb(y,x)
 
@@ -101,7 +94,7 @@ Rule of thumb bandwidth for regressing `y` on `x`.
 function hRuleOfThumb(y,x)
 
     T            = length(y)
-    (b,res,)     = OlsGMFn(y,[x.^2 x ones(T)])
+    (b,res,)     = OlsGM(y,[x.^2 x ones(T)])
     (σ,γ)        = (std(res), b[1])
     (x_10,x_90)  = quantile(x,[0.1,0.9])             #10th and 90th percentiles
 
@@ -109,12 +102,10 @@ function hRuleOfThumb(y,x)
 
     return h_rot
 end
-##------------------------------------------------------------------------------
 
 
-##------------------------------------------------------------------------------
 """
-    LocalLinearRegFn(y,x,xGrid,h,vv = :all,DoCovb=true,KernelFun=GaussianKernel)
+    LocalLinearRegression(y,x,xGrid,h,vv = :all,DoCovb=true,KernelFun=GaussianKernel)
 
 Do local linear regression `y = a + b(x-xGrid[i])`, where both `a` and `b` will differ
 across `xGrid[i]` values. The estimates of `a` and their standard errors are
@@ -123,7 +114,7 @@ exported.
 See `KernRegrFn()` for further comments
 
 """
-function LocalLinearFn(y,x,xGrid,h,vv = :all,DoCovb=true,KernelFun=GaussianKernel)
+function LocalLinearRegression(y,x,xGrid,h,vv = :all,DoCovb=true,KernelFun=GaussianKernel)
 
     if vv != :all
         (y,x) = (y[vv],x[vv])
@@ -139,7 +130,7 @@ function LocalLinearFn(y,x,xGrid,h,vv = :all,DoCovb=true,KernelFun=GaussianKerne
         w05 = sqrt.(w)
         x2  = hcat(c,x .- xGrid[i])
         if DoCovb
-            (b_i,_,_,Covb_i,) = OlsNWFn(w05.*y,w05.*x2,0)
+            (b_i,_,_,Covb_i,) = OlsNW(w05.*y,w05.*x2,0)
             aHat[i]    = b_i[1]
             StdaHat[i] = sqrt(Covb_i[1,1])
         else
@@ -151,4 +142,3 @@ function LocalLinearFn(y,x,xGrid,h,vv = :all,DoCovb=true,KernelFun=GaussianKerne
     return aHat, StdaHat
 
 end
-##------------------------------------------------------------------------------

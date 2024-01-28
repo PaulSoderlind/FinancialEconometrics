@@ -1,4 +1,3 @@
-##------------------------------------------------------------------------------
 """
     CompanionFormAR(a)
 
@@ -13,10 +12,8 @@ function CompanionFormAR(a)
     end
     return A1
 end
-##------------------------------------------------------------------------------
 
 
-##------------------------------------------------------------------------------
 """
     ARpEst(y,p)
 
@@ -30,8 +27,8 @@ function ARpEst(y,p)
     T    = length(y)
 
     xAll = fill(NaN,T,p)               #build matrix of regressors
-    for s = 1:p                        #or reduce(hcat,lagFn(y,s) for s=1:p)
-        xAll[:,s] = lagFn(y,s)
+    for s = 1:p                        #or reduce(hcat,lag(y,s) for s=1:p)
+        xAll[:,s] = lag(y,s)
     end
     xAll = [xAll ones(T)]              #add constant last
     #printmat([y xAll][1:10,:])        #uncomment to see the regressors
@@ -42,10 +39,8 @@ function ARpEst(y,p)
     return a
 
 end
-##------------------------------------------------------------------------------
 
 
-##------------------------------------------------------------------------------
 """
     MAqLL(par,y)
 
@@ -60,4 +55,3 @@ function MAqLL(par::Vector,y)
     LL    = sum(LL_i)                  #sum(log-likelihood values)
     return LL, ϵ
 end
-##------------------------------------------------------------------------------

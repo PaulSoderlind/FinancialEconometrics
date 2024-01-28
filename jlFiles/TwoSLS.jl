@@ -1,5 +1,5 @@
 """
-    TwoSLSFn(y,x,z,NWQ=false,m=0)
+    TwoSLS(y,x,z,NWQ=false,m=0)
 
 ### Input
 - `y::VecOrMat`:      Tx1 or T-vector of the dependent variable
@@ -21,11 +21,11 @@
 
 ### Requires
 - Statistics, LinearAlgebra
-- CovNWFn
+- CovNW
 
 
 """
-function TwoSLSFn(y,x,z,NWQ=false,m=0)
+function TwoSLS(y,x,z,NWQ=false,m=0)
 
     (Ty,n) = (size(y,1),size(y,2))
     (k,L)  = (size(x,2),size(z,2))
@@ -39,7 +39,7 @@ function TwoSLSFn(y,x,z,NWQ=false,m=0)
     Stdδ  = similar(δ)           #Lxk standard errors of δ
     for i = 1:k                  #loop over columns in x
         if NWQ                   #NW standard errors
-            S      = CovNWFn(resx[:,i].*z,m)
+            S      = CovNW(resx[:,i].*z,m)
             Covδ_i = Szz_1*S*Szz_1
         else                     #standard errors assuming iid
             Covδ_i = Szz_1*var(resx[:,i])
@@ -54,7 +54,7 @@ function TwoSLSFn(y,x,z,NWQ=false,m=0)
     R2   = cor(y,yhat)^2
     Sxz  = x'z              #stage 2 standard errors 
     if NWQ     #Cov(b) using Newey-West 
-        S    = CovNWFn(res.*z,m)
+        S    = CovNW(res.*z,m)
         B    = inv(Sxz*Szz_1*Sxz')*Sxz*Szz_1
         Covb = B*S*B'
     else       #Cov(b) assuming iid residuals, independent of z
