@@ -1,8 +1,8 @@
 """
     CovNW(g0,m=0,DivideByT=0)
 
-Calculates covariance matrix of sample sum (DivideByT=0), scaled average (DivideByT=1) or
-average (DivideByT=2).
+Calculates covariance matrix of sample sum (DivideByT=0), √T*(sample average) (DivideByT=1)
+or sample average (DivideByT=2).
 
 
 ### Input
@@ -14,9 +14,10 @@ average (DivideByT=2).
 - `S::Matrix`: qxq covariance matrix
 
 ### Remark
-- `DivideByT=0`: Var( g₁+g₂+...)
-- `DivideByT=1`: Var((g₁+g₂+...)/sqrt(T))
-- `DivideByT=2`: Var((g₁+g₂+...)/T)
+- `DivideByT=0`: Var(g₁+g₂+...), variance of sample sum
+- `DivideByT=1`: Var(g₁+g₂+...)/T = Var(√T gbar), where gbar is the sample average. This is
+   the same as Var(gᵢ) if data is iid
+- `DivideByT=2`: Var(g₁+g₂+...)/T^2 = Var(gbar)
 
 
 """
