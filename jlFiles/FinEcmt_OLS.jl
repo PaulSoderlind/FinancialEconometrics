@@ -12,7 +12,7 @@ NWCovPs, OLSyxReplaceNaN, OlsAutoCorr, OlsGM, OlsNW, OlsR2Test, OlsSure, OlsWhit
 PanelOls, PanelyxReplaceNaN, PanelyxReplaceNaN!, PanelyxReshuffle, PutDataInNT,
 QuantRegrIRLS, ReturnStats, RidgeRegression, StandardiseYX,
 TwoSLS, excise, lag,
-printblue, printlnPs, printmagenta, printmat, printred, printyellow,
+printblue, printlnPs, printmagenta, printmat, printred, printyellow, @doc2,
 rankPs, sortLoHi
 
 include("CovNW.jl")
