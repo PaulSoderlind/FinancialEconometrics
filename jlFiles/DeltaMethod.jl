@@ -3,7 +3,7 @@
 
 Apply the delta method on the function `fn(β,x)`
 
-# Input
+### Input
 - `fn::Function`:     of the type fn(β,x)
 - `β::Vector`:        with parameters 
 - `V::Matrix`:        Cov(β)
