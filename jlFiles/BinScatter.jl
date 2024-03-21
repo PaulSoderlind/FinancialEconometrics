@@ -4,7 +4,7 @@
 Do a regression `y = x₁'γ + d'β + u`, where `d` is an N-vector indicating
 membership in a certain `x₂` bin. Plotting `β` against those bins is a binscatter plot.
 
-# Input:
+### Input:
 - `y::Vector`:         dependent variable
 - `x₁::VecOrMat`:      control variables
 - `x₂::Vector`:        main regressor of interest
@@ -13,7 +13,7 @@ membership in a certain `x₂` bin. Plotting `β` against those bins is a binsca
 - `N::Vector`:         number of quantiles, giving N+1 bins. Used if `L=U=[]`
 - `critval::Vector`:   for calculation of confidence band
 
-# Output
+### Output
 - `β::Vector`:         N-vector of coeffs on the bin (x₂) dummies
 - `stdβ::Vector`:      N-vector of std of β
 - `fnO::NamedTuple`:   with (LU,confBand)
@@ -70,12 +70,12 @@ end
 
 Creates TxK BitArray `D` where `D[i,k]=true` if `L[k]<y[i]<=U[k]`
 
-# Input
+### Input
 - `y::Vector`:      T-vector of data
 - `L::Vector`:      K-vector of lower bin boundary
 - `U::Vector`:      K-vector of upper bin boundary
 
-# Output
+### Output
 - `D::VecOrMat`:       TxK BitArray
 - `D_colchk::Vector`:  K-vector, `true` if column `j` in `D` is empty (full of `false`), for checking
 - `y_binchk::Vector`:  T-vector, `true` if `y[i]` is in no bin, for checking
