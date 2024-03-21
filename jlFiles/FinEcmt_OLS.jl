@@ -4,7 +4,8 @@ using Statistics, LinearAlgebra, Distributions, StatsBase
 import Printf
 using FiniteDiff: finite_difference_jacobian as jacobian
 
-export BeraJarqueTest, CompanionFormAR, CovNW, CovToCor,
+export BinScatter, BinDummies,
+BeraJarqueTest, CompanionFormAR, CovNW, CovToCor,
 DeltaMethod, DrawBlocks, EMA, EWportf,
 FindNNPanel, FindNNPs, FirstDiff, FixedEffects,
 IndividualDemean, KolSmirTest,
@@ -15,6 +16,7 @@ TwoSLS, excise, lag,
 printblue, printlnPs, printmagenta, printmat, printred, printyellow, @doc2,
 rankPs, sortLoHi
 
+include("BinScatter.jl")
 include("CovNW.jl")
 include("DeltaMethod.jl")
 include("DistributionTests.jl")
