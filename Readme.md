@@ -24,7 +24,7 @@ This version (late January 2024) is a *major rewrite*. Although the topics and d
 
 4. The folder Data contains some data sets used in the notebooks.
 
-5. The plots are in png format (so GitHub can show them). If you want sharper plots, change `default(fmt = :png)` to `default(fmt = :svg)` in one of the top cells.
+5. The plots are in png format. If you want sharper plots, change `default(fmt = :png)` to `default(fmt = :svg)` in one of the top cells.
 
 5. The current version is tested on Julia 1.10.
 
