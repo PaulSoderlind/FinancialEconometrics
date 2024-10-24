@@ -1,16 +1,18 @@
 module FinEcmt_OLS
 
-using Statistics, LinearAlgebra, Distributions, StatsBase
+using Statistics, LinearAlgebra, DelimitedFiles, Distributions, StatsBase
 import Printf
 using FiniteDiff: finite_difference_jacobian as jacobian
 
 export BinScatter, BinDummies,
 BeraJarqueTest, CompanionFormAR, CovNW, CovToCor,
 DeltaMethod, DrawBlocks, EMA, EWportf,
-FindNNPanel, FindNNPs, FirstDiff, FixedEffects,
+FindNNPanel, FindNN, FirstDiff,
 IndividualDemean, KolSmirTest,
-NWCovPs, OLSyxReplaceNaN, OlsAutoCorr, OlsGM, OlsNW, OlsR2Test, OlsSure, OlsWhitesTest,
-PanelOls, PanelyxReplaceNaN, PanelyxReplaceNaN!, PanelyxReshuffle, PutDataInNT,
+NWCovPs, OLSyxReplaceNaN, OlsAutoCorr, OlsBasic, OlsGM, OlsNW, OlsR2Test, OlsSure, OlsWhitesTest,
+PanelOls, PanelReshuffle, DummiesCreate, TimeDummiesTTN,
+FixedIndivEffects,FixedTimeEffects, FixedIndivTimeEffects, FixedTimeIndivEffects, FWonZRepeated!,
+PutDataInNT, Readcsv,
 QuantRegrIRLS, ReturnStats, RidgeRegression, StandardiseYX,
 TwoSLS, excise, lag,
 printblue, printlnPs, printmagenta, printmat, printred, printyellow, @doc2,
