@@ -77,12 +77,44 @@ Replaces any rows in Y and X with zeros if there is any NaN/missing in any of th
 """
 function OLSyxReplaceNaN(Y,X)
 
-  vv = FindNNPs(Y,X)             #vv[t] = true if no missing/NaN i (y[t],x[t,:])
+  vv = FindNN(Y,X)             #vv[t] = true if no missing/NaN i (y[t],x[t,:])
 
   (Yb,Xb)     = (copy(Y),copy(X))    #set both y[t] and x[t,:] to 0 if any missing/NaN for obs. t
   Yb[.!vv]   .= 0
   Xb[.!vv,:] .= 0
 
   return vv, Yb, Xb
+
+end
+
+
+"""
+    OlsBasic(Y,X,ExciseQ=false)
+
+LS of Y on X; for one dependent variable, only point estimates, fitted values and residuals.
+Optionally (`ExciseQ=true`) handles missing values/NaNs.
+
+### Input
+- `Y::Vector`:      T-vector, the dependent variable
+- `X::Matrix`:      Txk matrix of regressors (including deterministic ones)
+- `ExciseQ::Bool`:  true: get rid of missing/NaN cases in estimation, but put them back in (u,Yhat)
+
+### Output
+- `b::Vector`:    k-vector, regression coefficients
+- `u::Vector`:    T-vector, residuals Y - yhat
+- `Yhat::Vector`: T-vector, fitted values X*b
+
+"""
+function OlsBasic(Y,X,ExciseQ=false)
+
+    if ExciseQ
+        (vv,Y,X) = OLSyxReplaceNaN(Y,X)            #creates new (Y,X)
+    end
+    b    = X\Y
+    Yhat = X*b
+    ExciseQ && (Yhat[.!vv] .= NaN)                 #puts obs with missings/NaN to NaN
+    u    = Y - Yhat
+
+    return b, u, Yhat
 
 end

@@ -28,6 +28,60 @@ end
 
 
 """
+
+    Readcsv(DataFile,SkipCols=1,NaNCode="NA";ToFloat=false)
+
+
+Read a csv file and create a named tuple with variables, with the names
+taken from the header.
+
+### Input
+- `DataFile::String`:           file path
+- `SkipCols::Int`:              number of leading columns to skip (often 1)
+- `NaNCode::String or Number`:  indicator for missing value in the file ("NA",-999.99, etc)
+- `ToFloat::Bool`:              if true: convert all Ints and Floats to Float64
+- `delim::Char`:                typically ',' or '\t'
+
+### Output
+- `d::NamedTuple`:              with data, as d.X, d.Y, etc
+
+### Remark
+- The conversion of Ints and Floats is to Int64 (with missing) and Float64 (with NaN), respectively,
+but with `ToFloat=true` all Ints and Floats are converted to Float64 (wih NaN).
+
+
+"""
+function Readcsv(DataFile,SkipCols=1,NaNCode="NA";ToFloat=false,delim=',')
+
+  (xx,header) = readdlm(DataFile,delim;header=true)
+  n = size(xx,2)
+  xx = replace(z -> z==NaNCode ? missing : z,xx)
+  namesB = tuple(Symbol.(header[SkipCols+1:end])...)       #a tuple (:X,:Y,:Z)
+
+  dx = Vector{Any}(undef,n)
+  for i in 1:n
+    xx_i = xx[:,i]
+    intQ = all(z->isa(z,Union{Integer,Missing}),xx_i)                             #all are integers
+    fltQ = any(z->isa(z,AbstractFloat),xx_i) && all(z->isa(z,Union{Real,Missing}),xx_i)  #all are real and some are floats
+    misQ = any(ismissing,xx_i)
+    #println(i," ",xx_i[1]," ",intQ," ",fltQ," ",misQ)
+    if intQ && !ToFloat
+      dx[i] = misQ ? convert.(Union{Int,Missing},xx_i) : convert.(Int,xx_i)
+    elseif (intQ && ToFloat) || fltQ
+      misQ && (xx_i  = replace(z -> ismissing(z) ? NaN : z,xx_i))
+      dx[i] = convert.(Float64,xx_i)
+    else
+      dx[i] = xx_i
+    end
+  end
+  d = NamedTuple{namesB}(dx[SkipCols+1:end])
+
+  return d
+
+end
+
+
+"""
     lag(x,n=1)
 
 Create a matrix or vector of lagged values.
@@ -60,26 +114,33 @@ end
 
 
 """
-    excise(x...)
+    excise(x...;xtype=Any)
 
 Remove all lines where the is a NaN/missing in any of the x arrays
 
+### Input
+- `xtype::Type`:      type to convert the data to
+
 ### Examples
 - `x1 = excise(x)`
-- `(y1,x1) = excise(y,x)`
+- `(y1,x1) = excise(y,x;xtype=Float64)`
 
 """
-function excise(x...)
+function excise(x...;xtype=Any)
   n  = length(x)
-  vv = FindNNPs(x...)         #find rows with NaN/missing
-  z = ntuple(i->copy(selectdim(x[i],1,vv)),n)    #create a tuple of arrays
+  vv = FindNN(x...)         #find rows with NaN/missing
+  if xtype != Any
+    z = ntuple(i->convert.(xtype,copy(selectdim(x[i],1,vv))),n)    #create a tuple of arrays
+  else
+    z = ntuple(i->copy(selectdim(x[i],1,vv)),n)    #create a tuple of arrays
+  end
   (n==1) && (z = z[1])                           #if a single array in the tuple
   return z
 end
 
 
 """
-    FindNNPs(x...;Keepdim=1)
+    FindNN(x...;Keepdim=1)
 
 Find rows (if Keepdim==1) which have no NaNs missing in other dimensions (eg. in no columns).
 
@@ -92,12 +153,12 @@ Find rows (if Keepdim==1) which have no NaNs missing in other dimensions (eg. in
 
 ### Notice
 - Set Keepdim=2 if we should instead look for NaNs/missings along rows (and other dimensions).
-- For heterogenous arrays like `x=[x1,x1]`, use `FindNNPs(x...)`
+- For heterogenous arrays like `x=[x1,x1]`, use `FindNN(x...)`
 
 Paul.Soderlind@unisg.ch
 
 """
-function FindNNPs(x...;Keepdim=1)
+function FindNN(x...;Keepdim=1)
 
   N  = length(x)
   T  = size(x[1],Keepdim)                    #length of output
