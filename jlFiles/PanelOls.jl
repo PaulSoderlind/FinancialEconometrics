@@ -15,7 +15,7 @@ Pooled OLS estimation.
       1. `theta`         (K*L)x1 vector, LS estimates of regression coeefficients on kron(z,x)
       2. `CovDK`         (K*L)x(K*L) matrix, Driscoll-Kraay covariance matrix
       3. `CovC`          covariance matrix, cluster
-      4. `CovW`          covariance matrix, White's
+      4. `CovNW`         covariance matrix, Newey-West (or White if m=0)
       5. `CovLS`         covariance matrix, iid
       6. `R2`            scalar, (pseudo-) R2
       7. `yhat`          TxN matrix with fitted values
@@ -98,7 +98,6 @@ function PanelOls(y0,x0,m=0,clust=[];FixNaNQ=false)
       end
     end
   end
-  #println("")
 
   ShatDK = NWCovPs(omega0DK,omegajDK,1)          #estimate of S, DK
   ShatC  = NWCovPs(omega0C, omegajC, 1)          #estimate of S, cluster
@@ -107,14 +106,13 @@ function PanelOls(y0,x0,m=0,clust=[];FixNaNQ=false)
   xx_1  = inv(xx)
   CovDK = xx_1 * ShatDK  * xx_1'                  #covariance matrix, DK
   CovC  = xx_1 * ShatC   * xx_1'                  #covariance matrix, cluster
-  CovW  = xx_1 * ShatW   * xx_1'                  #covariance matrix, White's
+  CovNW = xx_1 * ShatW   * xx_1'                  #covariance matrix, Newey-West (White if m=0)
   CovLS = xx_1 * s2                               #covariance matrix, LS
 
   R2  = cor(vec(y[vvM]),vec(yhat[vvM]))^2
   any(.!vvM) && (yhat[.!vvM] .= NaN)              #0 -> NaN
 
-  fnOutput = (;theta,CovDK,CovC,CovW,CovLS,R2,yhat,Nb)
-  #f2 = (;r,s2,xx,TNb)
+  fnOutput = (;theta,CovDK,CovC,CovNW,CovLS,R2,yhat,Nb)
 
   return fnOutput
 
