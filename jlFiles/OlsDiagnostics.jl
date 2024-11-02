@@ -16,7 +16,7 @@ an intercept for R² to be useful.
 """
 function OlsR2Test(R²,T,df)
     RegrStat = T*R²/(1-R²)           #R\^2[TAB]
-    pval     = 1 - cdf(Chisq(df),RegrStat)    #or ccdf() to get 1-cdf()
+    pval     = ccdf(Chisq(df),RegrStat)    #same as 1-cdf()
     return RegrStat, pval
 end
 
@@ -51,7 +51,7 @@ function OlsWhitesTest(u,x)
     df = rank(w) - 1                    #number of independent regressors in w
 
     WhiteStat = T*R²/(1-R²)
-    pval      = 1 - cdf(Chisq(df),WhiteStat)
+    pval      = ccdf(Chisq(df),WhiteStat)
 
     return WhiteStat, pval
 
@@ -81,18 +81,141 @@ function OlsAutoCorr(u,L=1)
     T = size(u,1)
 
     Stdu = std(u)
-    ρ    = autocor(u,1:L)        #\rho[TAB]
+    ρ    = autocor(u,1:L)
     t_ρ  = sqrt(T)*ρ             #t-stat of ρ 
 
-    pval      = 2*(1.0 .- cdf.(Normal(0,1),abs.(t_ρ)))
+    pval      = 2*ccdf.(Normal(0,1),abs.(t_ρ))
     AutoCorr  = [ρ t_ρ pval]
 
     BPStat    = T*sum(ρ.^2)
-    pval      = 1 - cdf(Chisq(L),BPStat)
+    pval      = ccdf(Chisq(L),BPStat)
     BoxPierce = [BPStat pval]
 
     DWStat    = mean(diff(u).^2)/Stdu^2
 
     return AutoCorr, BoxPierce, DWStat
+
+end
+
+
+"""
+    RegressionFit(u,R²,k)
+
+Calculate adjusted R², AIC and BIC from regression residuals.
+
+### Input
+- `u::Vector`:      T-vector of residuals
+- `R²::Float`:      the R² value
+- `k::Int`:         number of regressors
+
+"""
+function RegressionFit(u,R²,k)
+  T     = length(u)
+  σ²    = var(u)
+  R²adj = 1 - (1-R²)*(T-1)/(T-k)
+  AIC   = log(σ²) + 2*k/T
+  BIC   = log(σ²) + k/T * log(T)
+  return R²adj, AIC, BIC
+end
+
+
+"""
+    VIF(X)
+
+Calculate the variance inflation factor
+
+### Input
+- `x::Matrix`:    Txk matrix with regressors
+
+### Output
+- `maxVIF::Float`:     highest VIF value
+- `allVIF::Vector`:    a k VIF values
+
+"""
+function VIF(X)
+
+  k = size(X,2)
+
+  intercept_cols = [first(col) != 0 && allequal(col) for col in eachcol(X)]
+  !any(intercept_cols) && throw(ArgumentError("one of the colums of X must be a non-zero constant"))
+
+  R2 = fill(NaN,k)
+  for i = 1:k
+    if !intercept_cols[i]                 #if X[:,i] is not a constant
+      v       = filter(!=(i),1:k)         #exclude i from 1:k
+      R2[i] = OlsGM(X[:,i],X[:,v])[5]
+    else                                  #if X[:,i] is a constant
+      R2[i] = 0
+    end
+  end
+
+  allVIF = 1.0./(1.0 .- R2)
+  maxVIF = maximum(allVIF)
+
+  return maxVIF, allVIF
+
+end
+
+"""
+    DiagnosticsTable(X,u,R²,nlags,xNames="")
+
+Compute and print a number of regression diagnostic tests.
+
+### Input
+- `X::Matrix`:      Txk matrix of regressors
+- `u::Vector`:      T-vector of residuals
+- `R²::Float`:      the R² value
+- `nlags::Int`:     number of lags to use in autocorrelation test
+- `xNames::Vector`: of strings, regressor names
+
+"""
+function DiagnosticsTable(X,u,R²,nlags,xNames="")
+
+  (T,k) = size(X)
+
+  isempty(xNames) && (xNames = [string("x",'₀'+i) for i=1:k])    #create rowNames
+
+  printblue("Test of all slopes = 0")
+  df = k - 1              #number of slope coefficients
+  (RegrStat,pval) = OlsR2Test(R²,T,df)
+  printmat([RegrStat,pval],rowNames=["stat","p-val"])
+
+  printblue("White's test (H₀: heteroskedasticity is not correlated with regressors)")
+  (WhiteStat,pval) = OlsWhitesTest(u,X)
+  printmat([WhiteStat,pval],rowNames=["stat","p-val"])
+
+  printblue("Testing autocorrelation of residuals (lag 1 to $nlags)")
+  (ρStats,BoxPierce,DW) = OlsAutoCorr(u,nlags)
+  printmat(ρStats,colNames=["autocorr","t-stat","p-val"],rowNames=1:nlags,cell00="lag")
+
+  printblue("BoxPierce ($nlags lags) ")
+  printmat(BoxPierce',rowNames=["stat","p-val"])
+
+  printblue("DW statistic")
+  printlnPs(DW,"\n")
+
+  for i = 1:k         #iterate over different regressors
+      ρStats, = OlsAutoCorr(X[:,i].*u,nlags)
+      printblue("Autocorrelations of $(xNames[i])*u  (lag 1 to $nlags)")
+      printmat(ρStats,colNames=["autocorr","t-stat","p-val"],rowNames=1:nlags,cell00="lag")
+  end
+
+  printblue("Measures of fit")
+  (R²adj,AIC,BIC)  = RegressionFit(u,R²,k)
+  printmat([R²,R²adj,AIC,BIC];rowNames=["R²","R²adj","AIC","BIC"])
+
+  printblue("Test of normality")
+  (skewness,kurtosis,BJ,pvals) = BeraJarqueTest(u)
+  xut = vcat(skewness,kurtosis,BJ)
+  printmat(xut,collect(pvals);rowNames=["skewness","kurtosis","Bera-Jarque"],colNames=["stat","p-value"])
+
+  printblue("Correlation matrix (checking multicollinearity)")
+  printmat(cor(X);colNames=xNames,rowNames=xNames)
+
+  (maxVIF,allVIF) = VIF(X)
+  printblue("VIF (checking multicollinearity)")
+  printmat(allVIF;rowNames=xNames)
+
+  return nothing
 
 end

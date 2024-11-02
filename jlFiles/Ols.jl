@@ -118,3 +118,30 @@ function OlsBasic(Y,X,ExciseQ=false)
     return b, u, Yhat
 
 end
+
+
+"""
+    RegressionTable(b,V,xNames="")
+
+### Input
+- `b::Vector`:       of k point estimates
+- `V::Matrix`:       kxk variance-covariance matrix of b
+- `xNames::Vector`:  of k strings, variable names
+
+### Requires
+- Distributions, LinearAlgebra, Printf
+
+"""
+function RegressionTable(b,V,xNames="")
+
+  k = length(b)
+  isempty(xNames) && (xNames = [string("x",'₀'+i) for i=1:k])    #create rowNames
+
+  stderr = sqrt.(diag(V))
+  tstat = b./stderr
+  pval  = 2*ccdf.(Normal(0,1),abs.(tstat))    # ccdf(x) = 1-cdf(x)
+
+  colNames = ["coef","stderr","t-stat","p-value"]
+  printmat(b,stderr,tstat,pval;rowNames=xNames,colNames)
+
+end

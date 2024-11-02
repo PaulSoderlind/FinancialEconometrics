@@ -29,7 +29,7 @@ end
 
 """
 
-    Readcsv(DataFile,SkipCols=1,NaNCode="NA";ToFloat=false)
+    Readcsv(DataFile,SkipCols=1,NaNCode="NA";ToFloat=false,delim=',')
 
 
 Read a csv file and create a named tuple with variables, with the names
