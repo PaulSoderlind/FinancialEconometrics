@@ -18,7 +18,7 @@ This version (late January 2024) is a *major rewrite*. Although the topics and d
 
 1. ChapterNumber_Topic.ipynb are notebooks organised around different topics. The chapter numbers correspond to the lecture notes (pdf), where more details are given (and the notation is explained).
 
-2. Most statistical/econometric functions are organised in local modules, typically loaded at the top of the notebooks. The source code is in the jlFiles subfolder.
+2. Most statistical/econometric functions are organised in local modules, typically loaded at the top of the notebooks. The source code is in the src subfolder.
 
 3. The pdf file contains the lecture notes.
 
