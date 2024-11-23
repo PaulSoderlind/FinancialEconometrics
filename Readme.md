@@ -2,8 +2,6 @@
 
 This repository contains Julia code for a Financial Econometrics (MSc) course at UNISG.
 
-This version (late January 2024) is a *major rewrite*. Although the topics and data sets are similar to before, the way the econometrics functions are called is changed. 
-
 
 # Instructions
 
@@ -26,7 +24,7 @@ This version (late January 2024) is a *major rewrite*. Although the topics and d
 
 5. The plots are in png format. If you want sharper plots, change `default(fmt = :png)` to `default(fmt = :svg)` in one of the top cells.
 
-5. The current version is tested on Julia 1.10.
+6. The current version is tested on Julia 1.11.
 
 
 # Relation to Other Julia Econometrics Codes
