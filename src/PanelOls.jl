@@ -1,5 +1,5 @@
 """
-    PanelOls(y,x,m=0,clust=[];FixNaNQ=false)
+    PanelOls(y,x,m=0,clust=[];FixNaNQ=false,HacMethod=:NW)
 
 Pooled OLS estimation.
 
@@ -9,23 +9,26 @@ Pooled OLS estimation.
 - `m::Int`:             (optional), scalar, number of lags in covariance estimation
 - `clust::Vector{Int}`: (optional), N vector with cluster number for each individual, [`ones(N)`]
 - `FixNaNQ::Bool`:      (optional), true: replace all cases (y[t,i],x[t,:,i]) with some NaN/missing with (0,0), using PanelReplaceNaN()
+- `HacMethod::Symbol`:  :NW for Newey-West (tent shaped weights), :HH for Hodrick-Hansen (flat weights)
 
  ### Output
  - `fnOutput::NamedTuple`:   named tuple with the following elements
-      1. `theta`         (K*L)x1 vector, LS estimates of regression coeefficients on kron(z,x)
-      2. `CovDK`         (K*L)x(K*L) matrix, Driscoll-Kraay covariance matrix
-      3. `CovC`          covariance matrix, cluster
-      4. `CovNW`         covariance matrix, Newey-West (or White if m=0)
-      5. `CovLS`         covariance matrix, iid
-      6. `R2`            scalar, (pseudo-) R2
-      7. `yhat`          TxN matrix with fitted values
-      8. `Nb`            T-vector, number of obs in each period
+    * `theta`         (K*L)x1 vector, LS estimates of regression coeefficients on kron(z,x)
+    * `CovDK`         (K*L)x(K*L) matrix, Driscoll-Kraay covariance matrix
+    * `CovC`          covariance matrix, cluster
+    * `CovNW`         covariance matrix, Newey-West (or White if m=0)
+    * `CovAR`         covariance matrix, Arellano (handles autocorrelation)
+    * `CovCAR`        covariance matrix, cluster, Arellano (handles autocorrelation)
+    * `CovLS`         covariance matrix, iid
+    * `R2`            scalar, (pseudo-) R2
+    * `yhat`          TxN matrix with fitted values
+    * `Nb`            T-vector, number of obs in each period
 
 ### Notice
 - for TxNxK -> TxKxN, do `x = permutedims(z,[1,3,2])`
 
 """
-function PanelOls(y0,x0,m=0,clust=[];FixNaNQ=false)
+function PanelOls(y0,x0,m=0,clust=[];FixNaNQ=false,HacMethod=:NW)
 
   (T,N) = (size(y0,1),size(y0,2))
   K     = size(x0,2)                   #TxKxN
@@ -70,15 +73,19 @@ function PanelOls(y0,x0,m=0,clust=[];FixNaNQ=false)
   for i in 1:N
     h[:,:,i]   = r[:,i].*x[:,:,i]
   end
-  h_tM = dropdims(sum(h,dims=3),dims=3)   #TxK, moment conditions, aggregated over all
+  h_tM = dropdims(sum(h,dims=3),dims=3)   #TxK, moment conditions, aggregated over all i
+  h_iM = dropdims(sum(h,dims=1),dims=1)   #KxN, moment conditions aggregated over time
 
   hG_tM = fill(NaN,T,K,G)                 #moment conditions, aggregated to clusters
   for g in 1:G                            #loop over clusters
     vvg          = vvClust[:,g]
     hG_tM[:,:,g] = sum(view(h,:,:,vvg),dims=3)
   end
+  hG_M = dropdims(sum(hG_tM,dims=1),dims=1)  #KxG, cluster moment conditions, aggregated over time
 
-  s2 = sum(abs2,r)/TNb
+  s2      = sum(abs2,r)/TNb               #var(residual)
+  ShatAR  = h_iM*h_iM'                    #Arellano
+  ShatCAR = hG_M*hG_M'                    #cluster, Arellano
 
   (omega0DK,omega0W,omega0C) = [zeros(K,K) for i in 1:3]    #DK lag 0,White's,cluster
   (omegajDK,omegajW,omegajC) = [zeros(K,K,m) for i in 1:3]  #lags 1 to m
@@ -99,20 +106,22 @@ function PanelOls(y0,x0,m=0,clust=[];FixNaNQ=false)
     end
   end
 
-  ShatDK = NWCovPs(omega0DK,omegajDK,1)          #estimate of S, DK
-  ShatC  = NWCovPs(omega0C, omegajC, 1)          #estimate of S, cluster
-  ShatW  = NWCovPs(omega0W, omegajW, 1)          #estimate of S, White's
+  ShatDK = NWCovPs(omega0DK,omegajDK,1,HacMethod)   #estimate of S, DK
+  ShatC  = NWCovPs(omega0C, omegajC, 1,HacMethod)   #estimate of S, cluster
+  ShatW  = NWCovPs(omega0W, omegajW, 1,HacMethod)   #estimate of S, White's
 
-  xx_1  = inv(xx)
-  CovDK = xx_1 * ShatDK  * xx_1'                  #covariance matrix, DK
-  CovC  = xx_1 * ShatC   * xx_1'                  #covariance matrix, cluster
-  CovNW = xx_1 * ShatW   * xx_1'                  #covariance matrix, Newey-West (White if m=0)
-  CovLS = xx_1 * s2                               #covariance matrix, LS
+  xx_1   = inv(xx)
+  CovDK  = xx_1 * ShatDK  * xx_1'                  #covariance matrix, DK
+  CovC   = xx_1 * ShatC   * xx_1'                  #covariance matrix, cluster
+  CovNW  = xx_1 * ShatW   * xx_1'                  #covariance matrix, Newey-West (White if m=0)
+  CovAR  = xx_1 * ShatAR  * xx_1'                  #covariance matrix, Arellano
+  CovCAR = xx_1 * ShatCAR * xx_1'                  #covariance matrix, cluster, Arellano
+  CovLS  = xx_1 * s2                               #covariance matrix, LS
 
   R2  = cor(vec(y[vvM]),vec(yhat[vvM]))^2
   any(.!vvM) && (yhat[.!vvM] .= NaN)              #0 -> NaN
 
-  fnOutput = (;theta,CovDK,CovC,CovNW,CovLS,R2,yhat,Nb)
+  fnOutput = (;theta,CovDK,CovC,CovNW,CovAR,CovCAR,CovLS,R2,yhat,Nb)
 
   return fnOutput
 
@@ -120,17 +129,18 @@ end
 
 
 """
-    NWCovPs(omega0,omegaj,T)
+    NWCovPs(omega0,omegaj,T,HacMethod=:NW)
 
 Calculate covariance matrix of sample average as in Newey-West from a
 KxK `omega0` matrix and a KxKxm array `omegaj`. The latter contains m KxK
 matrices with autocovariances.
 """
-function NWCovPs(omega0,omegaj,T)
+function NWCovPs(omega0,omegaj,T,HacMethod=:NW)
   m = size(omegaj,3)
   Shat = omega0/T^2
   for j in 1:m
-    Shat .= Shat .+ (1-j/(m+1))*(omegaj[:,:,j] + omegaj[:,:,j]')/T^2
+    w = HacMethod == :NW ? (1-j/(m+1)) : 1.0
+    Shat .= Shat .+ w*(omegaj[:,:,j] + omegaj[:,:,j]')/T^2
   end
   return Shat
 end
@@ -499,7 +509,7 @@ end
 ```
 
 """
-function FWonZRepeated!(Y,X,Z,p=10)
+function FWonZRepeated!(Y,X,Z,p=25)
 
   Zreshape(Z) = reshape( permutedims(Z,(1,3,2)),:,size(Z,2) )     #TxKxN => TNxK matrix
 
@@ -507,19 +517,24 @@ function FWonZRepeated!(Y,X,Z,p=10)
   (T,N,K) = (size(Y,1),size(Y,2),size(X,2))
 
   for j in 1:p:M                                   #loop over 1,4,7, etc for p = 3
+
     vj = j:min(j+p-1,M)                            #Z[:,vj,:], 1:3,4:6,7:9, etc
-    (mod(j-1,p*10)==0) && print("\rProcessed $(vj[1])-$(vj[end]) of $M")
+    (j>1) && (mod(j-1,p*10)==0) && print("\rProcessed $(vj[1])-$(vj[end]) of $M")
     #println(j," ",vj," ",maximum(vj)+1," ",M)
+
     Zj    = copy(Zreshape(Z[:,vj,:]))
     Sxx_f = factorize(Zj'*Zj)
     OlsWrite!( vec(Y),Zj,Sxx_f,Y,0,true )                     #Y on Z[:,vj,:]
+
     Threads.@threads for i in 1:K                             #X[:,i,:] on Z[:,vj,:]
       OlsWrite!( vec(X[:,i,:]),Zj,Sxx_f,X,i,false )
     end
+
     Threads.@threads for i in maximum(vj)+1:M                 #Z[:,vj+1,:] on Z[:,vj,:]
       OlsWrite!( vec(Z[:,i,:]),Zj,Sxx_f,Z,i,false )
     end
     Z[:,vj,:] .= NaN                                          #done Z[:,vj,:], set to NaN
+
   end
   println()
 
