@@ -205,9 +205,9 @@ function DiagnosticsTable(X,u,R²,nlags,xNames="")
   printmat([R²,R²adj,AIC,BIC];rowNames=["R²","R²adj","AIC","BIC"])
 
   printblue("Test of normality")
-  (skewness,kurtosis,BJ,pvals) = BeraJarqueTest(u)
-  xut = vcat(skewness,kurtosis,BJ)
-  printmat(xut,collect(pvals);rowNames=["skewness","kurtosis","Bera-Jarque"],colNames=["stat","p-value"])
+  (skewness,kurtosis,JB,pvals) = BeraJarqueTest(u)
+  xut = vcat(skewness,kurtosis,JB)
+  printmat(xut,collect(pvals);rowNames=["skewness","kurtosis","Jarque-Bera"],colNames=["stat","p-value"])
 
   printblue("Correlation matrix (checking multicollinearity)")
   printmat(cor(X);colNames=xNames,rowNames=xNames)

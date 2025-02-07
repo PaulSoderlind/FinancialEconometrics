@@ -1,7 +1,7 @@
 """
     BeraJarqueTest(x)
 
-Calculate the BJ test for each column in a matrix. Reports `(skewness,kurtosis,BJ)`.
+Calculate the JB test for each column in a matrix. Reports `(skewness,kurtosis,JB)`.
 
 """
 function BeraJarqueTest(x)
@@ -11,17 +11,17 @@ function BeraJarqueTest(x)
     xStd  = (x .- μ)./σ               #first normalize to a zero mean, unit std variable
     skewness = mean(z->z^3,xStd,dims=1)
     kurtosis = mean(z->z^4,xStd,dims=1)
-    BJ       = (T/6)*abs2.(skewness) + (T/24)*abs2.(kurtosis.-3)   #Bera-Jarque, Chisq(2)
+    JB       = (T/6)*abs2.(skewness) + (T/24)*abs2.(kurtosis.-3)   #Jarque-Bera, Chisq(2)
     if n == 1 
-        (skewness,kurtosis,BJ) = (only(skewness),only(kurtosis),only(BJ))  #to numbers if n=1
+        (skewness,kurtosis,JB) = (only(skewness),only(kurtosis),only(JB))  #to numbers if n=1
     end
 
     pskew = 2*ccdf.(Normal(0,sqrt(6/T)), abs.(skewness))
     pkurt = 2*ccdf.(Normal(3,sqrt(24/T)),abs.(kurtosis))
-    pBJ   = ccdf.(Chisq(2),BJ)
-    pvals = (;pskew,pkurt,pBJ)
+    pJB   = ccdf.(Chisq(2),JB)
+    pvals = (;pskew,pkurt,pJB)
 
-    return skewness, kurtosis, BJ, pvals
+    return skewness, kurtosis, JB, pvals
 end   
 
 
