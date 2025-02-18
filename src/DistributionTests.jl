@@ -1,10 +1,10 @@
 """
-    BeraJarqueTest(x)
+    JarqueBeraTest(x)
 
 Calculate the JB test for each column in a matrix. Reports `(skewness,kurtosis,JB)`.
 
 """
-function BeraJarqueTest(x)
+function JarqueBeraTest(x)
     (T,n) = (size(x,1),size(x,2))    #number of columns in x
     μ     = mean(x,dims=1)
     σ     = std(x,dims=1)

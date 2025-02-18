@@ -5,7 +5,7 @@ import Printf
 using FiniteDiff: finite_difference_jacobian as jacobian
 
 export BinScatter, BinDummies,
-BeraJarqueTest, CompanionFormAR, CovNW, CovToCor,
+JarqueBeraTest, CompanionFormAR, CovNW, CovToCor,
 DeltaMethod, DrawBlocks, EMA, EWportf,
 FindNNPanel, FindNN, FirstDiff,
 IndividualDemean, KolSmirTest,

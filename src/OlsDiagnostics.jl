@@ -205,7 +205,7 @@ function DiagnosticsTable(X,u,R²,nlags,xNames="")
   printmat([R²,R²adj,AIC,BIC];rowNames=["R²","R²adj","AIC","BIC"])
 
   printblue("Test of normality")
-  (skewness,kurtosis,JB,pvals) = BeraJarqueTest(u)
+  (skewness,kurtosis,JB,pvals) = JarqueBeraTest(u)
   xut = vcat(skewness,kurtosis,JB)
   printmat(xut,collect(pvals);rowNames=["skewness","kurtosis","Jarque-Bera"],colNames=["stat","p-value"])
 
