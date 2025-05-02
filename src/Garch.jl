@@ -1,17 +1,16 @@
 """
-    garch11LL(par,yx)
+    garch11LL(par,y,x)
 
 Calculate `(LL_t,σ²,yhat,u)` for regression `y = x'b + u` where
 `u` follows a GARCH(1,1) process with paramaters `(ω,α,β)`.
 
 ### Input
 - `par::Vector`:  parameters, `[b;ω;α;β]`
-- `yx::Matrix`:   `[y x]` where `y` is Tx1 and `x` is Txk.
+- `y::VecOrMat`:   Tx1
+- `x::VecOrMat`:   Txk.
 
 """
-function garch11LL(par,yx)
-
-    (y,x) = (yx[:,1],yx[:,2:end])
+function garch11LL(par,y,x)
 
     (T,k) = (size(x,1),size(x,2))
 
@@ -28,7 +27,9 @@ function garch11LL(par,yx)
       σ²[t] = ω + α*u[t-1]^2 + β*σ²[t-1]
     end
 
-    LL_t    = -(1/2)*log(2*π) .- (1/2)*log.(σ²) .- (1/2)*(u.^2)./σ²
+    #LL_t    = -(1/2)*log(2*π) .- (1/2)*log.(σ²) .- (1/2)*(u.^2)./σ²
+    σ = sqrt.(σ²)
+    LL_t = logpdfNorm.(u./σ) - log.(σ)
     LL_t[1] = 0.0               #effectively skip the first observation
 
     return LL_t, σ², yhat, u
@@ -37,20 +38,19 @@ end
 
 
 """
-    egarch11LL(par,yx)
+    egarch11LL(par,y,x)
 
-  Calculate `(LL_t,σ²,yhat,u)` for regression `y = x'b + u` where
-  `u` follows an eGARCH(1,1) process with paramaters `(ω,α,β,γ)`.
+Calculate `(LL_t,σ²,yhat,u)` for regression `y = x'b + u` where
+`u` follows an eGARCH(1,1) process with paramaters `(ω,α,β,γ)`.
 
-  ### Input
-  - `par::Vector`:  parameters, `[b;ω;α;β;γ]`
-  - `yx::Matrix`:   `[y x]` where `y` is Tx1 and `x` is Txk.
+### Input
+- `par::Vector`:  parameters, `[b;ω;α;β;γ]`
+- `y::VecOrMat`:   Tx1
+- `x::VecOrMat`:   Txk.
 
 
 """
-function egarch11LL(par,yx)
-
-  (y,x) = (yx[:,1],yx[:,2:end])            #split up data matrix
+function egarch11LL(par,y,x)
 
   (T,k) = (size(x,1),size(x,2))
 
@@ -69,7 +69,9 @@ function egarch11LL(par,yx)
   end
   σ² = exp.(lnσ²)
 
-  LL_t    = -(1/2)*log(2*π) .- (1/2)*log.(σ²) - (1/2)*(u.^2)./σ²
+  #LL_t    = -(1/2)*log(2*π) .- (1/2)*log.(σ²) - (1/2)*(u.^2)./σ²
+  σ = sqrt.(σ²)
+  LL_t = logpdfNorm.(u./σ) - log.(σ)
   LL_t[1] = 0
 
   #LL = sum(LL_t)

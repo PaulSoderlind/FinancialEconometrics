@@ -1,5 +1,5 @@
 """
-    MLE(LLtFun,par0,x,lower,upper)
+    MLE(LLtFun,par0,y,x,lower,upper)
 
 Calculate ML point estimates of K parameters and three different types of standard errors:
 from the Information matrix, from the gradients and the sandwich approach.
@@ -7,7 +7,8 @@ from the Information matrix, from the gradients and the sandwich approach.
 ### Input
 - `LLtFun::Function`:  name of log-likelihood function
 - `par0::Vector`:      K-vector, starting guess of the parameters
-- `x::VecOrMat`:       vector or matrix with data, unpacked (if necessary) inside LLtFun
+- `y::VecOrMat`:       vector or matrix with the dependent variable
+- `x::VecOrMat`:       vector or matrix with data, use `nothing` if not needed
 - `lower::Vector`:     lower bounds on the parameters, nothing or fill(-Inf,K) if no bounds
 - `upper::Vector`:     upper bounds on the parameters, nothing or fill(Inf,K) if no bounds
 
@@ -15,30 +16,29 @@ from the Information matrix, from the gradients and the sandwich approach.
 - `using FiniteDiff: finite_difference_hessian as hessian, finite_difference_jacobian as jacobian`
 
 ### Notice
-The `LLtFun` should take `(par,x)` as inputs and generate a T-vector `LLt` as output.
+The `LLtFun` should take `(par,y,x)` as inputs and generate a T-vector `LLt` as output.
 
 """
-function MLE(LLtFun::Function,par0,x,lower=nothing,upper=nothing)
+function MLE(LLtFun::Function,par0,y,x,lower=nothing,upper=nothing)
 
-
-    LL_t = LLtFun(par0,x)
+    LL_t = LLtFun(par0,y,x)                       #trying the LLtFun
     T    = length(LL_t)
 
     NoBounds = (isnothing(lower) && isnothing(upper)) || (all(!isfinite,lower) && all(!isfinite,upper))
 
     if NoBounds
-        Sol = optimize(par->-sum(LLtFun(par,x)),par0) #minimize -sum(LLt)
+        Sol = optimize(par->-sum(LLtFun(par,y,x)),par0) #minimize -sum(LLt)
     else
-        Sol = optimize(par->-sum(LLtFun(par,x)),lower,upper,par0)
+        Sol = optimize(par->-sum(LLtFun(par,y,x)),lower,upper,par0)
     end
-    parHat = Optim.minimizer(Sol)                    #the optimal solution
+    parHat = Optim.converged(Sol) ? Optim.minimizer(Sol) : fill(NaN,length(par0))  #the optimal solution
 
-    Ia = -hessian(par->mean(LLtFun(par,x)),parHat)   #2nd derivatives of mean(LLt)
+    Ia = -hessian(par->mean(LLtFun(par,y,x)),parHat)   #2nd derivatives of mean(LLt)
     Ia       = (Ia+Ia')/2                            #to guarantee symmetry
     vcv      = inv(Ia)/T
     std_hess = sqrt.(diag(vcv))
 
-    δL       = jacobian(par->LLtFun(par,x),parHat)   #TxK
+    δL       = jacobian(par->LLtFun(par,y,x),parHat)   #TxK
     J        = δL'δL/T                               #KxT * TxK
     vcv      = inv(J)/T
     std_grad = sqrt.(diag(vcv))

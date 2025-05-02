@@ -38,7 +38,7 @@ function QuantRegrIRLS(y,x,q=0.5;prec=1e-8,epsu=1e-6,maxiter=1000)
   while maximum(abs,b - b_old) > prec
     copyto!(b_old, b)
     b  .= (xw'*x)\(xw'*y)
-    u  .= y - x*b
+    u  .= y .- x*b
     #u  .= ifelse.(u.>0,1-q,q).*abs.(u)   #as in Python code, divide loss fn by q(1-q) to get it
     u  .= ifelse.(u.>0,1/q,1/(1-q)).*abs.(u)   #abs(u)/q if u>0, abs(u)/(1-q) if u<0
     u  .= max.(u,epsu)                         #not smaller than epsu

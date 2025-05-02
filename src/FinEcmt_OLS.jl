@@ -17,7 +17,7 @@ PutDataInNT, Readcsv,
 QuantRegrIRLS, ReturnStats, RidgeRegression, StandardiseYX,
 TwoSLS, excise, lag,
 printblue, printlnPs, printmagenta, printmat, printred, printyellow, @doc2,
-rankPs, sortLoHi
+rankPs, sortLoHi, logpdfNorm
 
 include("BinScatter.jl")
 include("CovNW.jl")

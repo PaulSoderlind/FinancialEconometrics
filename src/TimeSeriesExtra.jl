@@ -44,14 +44,14 @@ end
 """
     MAqLL(par,y)
 
-Log likelihood function for MA(q) process.
+Log likelihood function for MA(q) process. Same as
+`LL_i  = -1/2*log(2*π) .- 1/2*log(σ^2) .- 1/2*ϵ.^2/σ^2`
 
 """
 function MAqLL(par::Vector,y)
     (θ,σ) = (par[1:end-1],par[end])
     q     = length(θ)
-    ϵ     = ARMAFilter(y,-θ)           #ϵ is AR(q) with coefs -θ
-    LL_i  = -1/2*log(2*π) .- 1/2*log(σ^2) .- 1/2*ϵ.^2/σ^2
-    LL    = sum(LL_i)                  #sum(log-likelihood values)
-    return LL, ϵ
+    ϵ     = ARMAFilter(y,-θ)                #ϵ is AR(q) with coefs -θ
+    LL_i  = logpdfNorm.(ϵ./σ) .- log(σ)     #log of N(0,1) pdf - log(σ)
+    return LL_i, ϵ
 end

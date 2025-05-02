@@ -189,3 +189,17 @@ function CovToCor(covMat)
   corMat = covMat./sqrt.(d*d')
   return corMat
 end
+
+
+"""
+    logpdfNorm(x)
+
+Calculate the log pdf of a N(0,1) variable at x.
+Should give the same as `Distributions.logpdf(Normal(0,1),x)`
+
+"""
+function logpdfNorm(x)
+    f = -0.5*log(2*π) - 0.5*x^2
+    return f
+  end
+
