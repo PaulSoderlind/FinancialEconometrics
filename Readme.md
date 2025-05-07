@@ -7,9 +7,11 @@ This repository contains Julia code for a Financial Econometrics (MSc) course at
 
 1.  Most files are jupyter notebooks. Click one of them to see it online. If GitHub fails to render the notebook or messes up the LaTeX in the Markdown cells, then use [nbviewer](https://nbviewer.jupyter.org/). Instructions: try to open the notebook at GitHub, copy the link and paste it in the address field of nbviewer.
 
-2. To download this repository, use the Download (as zip) in the Github menu. Otherwise, clone it.
+2. A pdf file contains print-outs of all notebooks. 
 
-3. To get started, please check the *Ch00_HowToUse.ipynb* notebook first.
+3. To download this repository, use the Download (as zip) in the Github menu. Otherwise, clone it.
+
+4. To get started, please check the *Ch00_HowToUse.ipynb* notebook first.
 
 
 # On the Files
@@ -18,13 +20,15 @@ This repository contains Julia code for a Financial Econometrics (MSc) course at
 
 2. Most statistical/econometric functions are organised in local modules, typically loaded at the top of the notebooks. The source code is in the src subfolder.
 
-3. The pdf file contains the lecture notes.
+3. NotebooksAsPDF.pdf is a print-out of all notebooks. 
 
-4. The folder Data contains some data sets used in the notebooks.
+4. The pdf file contains the lecture notes.
 
-5. The plots are in png format. If you want sharper plots, change `default(fmt = :png)` to `default(fmt = :svg)` in one of the top cells.
+5. The folder Data contains some data sets used in the notebooks.
 
-6. The current version is tested on Julia 1.11.
+6. The plots are in png format. If you want sharper plots, change `default(fmt = :png)` to `default(fmt = :svg)` in one of the top cells.
+
+7. The current version is tested on Julia 1.11.
 
 
 # Relation to Other Julia Econometrics Codes
