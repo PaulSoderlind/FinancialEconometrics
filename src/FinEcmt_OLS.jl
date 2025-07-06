@@ -9,8 +9,9 @@ JarqueBeraTest, CompanionFormAR, CovNW, CovToCor,
 DeltaMethod, DrawBlocks, EMA, EWportf,
 FindNNPanel, FindNN, FirstDiff,
 IndividualDemean, KolSmirTest,
+HistcNorm, HistAsh,
 NWCovPs, OLSyxReplaceNaN, OlsAutoCorr, OlsBasic, OlsGM, OlsNW, RegressionTable,
-OlsR2Test, OlsSure, OlsWhitesTest,RegressionFit, VIF, DiagnosticsTable,
+OlsR2Test, OlsSure, OlsWhitesTest,RegressionFit, VIF, DiagnosticsTable, DiagnosticsNoniidTable,
 PanelOls, PanelReshuffle, DummiesCreate, TimeDummiesTTN,
 FixedIndivEffects,FixedTimeEffects, FixedIndivTimeEffects, FixedTimeIndivEffects, FWonZRepeated!,
 PutDataInNT, Readcsv,
@@ -23,6 +24,7 @@ include("BinScatter.jl")
 include("CovNW.jl")
 include("DeltaMethod.jl")
 include("DistributionTests.jl")
+include("HistAsh.jl")
 include("Ols.jl")
 include("OlsDiagnostics.jl")
 include("OlsSure.jl")

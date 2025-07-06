@@ -6,8 +6,8 @@ Calculate `(LL_t,σ²,yhat,u)` for regression `y = x'b + u` where
 
 ### Input
 - `par::Vector`:  parameters, `[b;ω;α;β]`
-- `y::VecOrMat`:   Tx1
-- `x::VecOrMat`:   Txk.
+- `y::VecOrMat`:   Tx1, dependent variable
+- `x::VecOrMat`:   Txk, regressors
 
 """
 function garch11LL(par,y,x)
@@ -32,7 +32,9 @@ function garch11LL(par,y,x)
     LL_t = logpdfNorm.(u./σ) - log.(σ)
     LL_t[1] = 0.0               #effectively skip the first observation
 
-    return LL_t, σ², yhat, u
+    v = u./σ                    #standardized residual
+
+    return LL_t, σ², yhat, u, v
 
 end
 
@@ -45,8 +47,8 @@ Calculate `(LL_t,σ²,yhat,u)` for regression `y = x'b + u` where
 
 ### Input
 - `par::Vector`:  parameters, `[b;ω;α;β;γ]`
-- `y::VecOrMat`:   Tx1
-- `x::VecOrMat`:   Txk.
+- `y::VecOrMat`:   Tx1, dependent variable
+- `x::VecOrMat`:   Txk, regressors
 
 
 """
@@ -74,52 +76,53 @@ function egarch11LL(par,y,x)
   LL_t = logpdfNorm.(u./σ) - log.(σ)
   LL_t[1] = 0
 
+  v = u./σ                    #standardized residual
+
   #LL = sum(LL_t)
 
-  return LL_t,σ²,yhat,u
+  return LL_t,σ²,yhat,u,v
 
 end
 
 
 """
-    DccLL(par,data)
+    DccLL(par,data,x)
 
-Calculate `(LL_t,Σ)` for a DCC model. `LL_t` is a vector with LL values
-`Σ` an (n,n,T) array with T covariance matrices (for `n` variables).
+Calculate `(LL_t,S)` for a DCC model. `LL_t` is a vector with LL values
+`S` an (n,n,T) array with T covariance matrices (for `n` variables).
 
 ### Input
-- `par::Vector`:  transformed parameters (a,b), will be transformed into (α,β) below
+- `par::Vector`:  transformed parameters (a,b), will be transformed into (α,β) inside fn
 - `data::Vector`: of arrays: v = data[1], σ² = data[2], Qbar = data[3]
+- `x::Any`:       dummy argument, to get the structure `(par,y,x)` as required by MLE()`
 
 """
-function DccLL(par,data)
+function DccLL(par,data,x=nothing)
 
-  #(α,β) = par
-  (α,β) = DccParTrans(par)             #restrict
-
-  (v,σ²,Qbar) = (data[1],data[2],data[3])    #unpack data
-
+  (α,β)       = DccParTrans(par)       #model parameters (from transformed parameters)
+  (v,σ²,Qbar) = data                   #unpack data
   (T,n) = (size(v,1),size(v,2))
 
-  u = v .* sqrt.(σ²)
+  u = v .* sqrt.(σ²)                   #non-standardized residuals, used in LL_t
 
-  Σ = fill(NaN,n,n,T)
+  (S,R) = (fill(NaN,T,n,n),fill(NaN,T,n,n))
   Q_t   = copy(Qbar)                    #starting guess
   LL_t  = zeros(T)
   for t = 2:T
     Q_t      = (1-α-β)*Qbar + α*v[t-1,:]*v[t-1,:]' + β*Q_t
     q_t      = diag(Q_t)
-    R_t      = Q_t./sqrt.(q_t*q_t')
+    R_t      = Q_t./sqrt.(q_t*q_t')         #implied correlation matrix
     d_t      = σ²[t,:]
-    Σ_t      = R_t.*sqrt.(d_t*d_t')
-    LL_t[t]  = -n*log(2*π) - logdet(Σ_t) - u[t,:]'*inv(Σ_t)*u[t,:]
-    Σ[:,:,t] = Σ_t
+    S_t      = R_t.*sqrt.(d_t*d_t')         #covariance matrix for u
+    LL_t[t]  = -n*log(2*π) - logdet(S_t) - u[t,:]'*inv(S_t)*u[t,:]
+    S[t,:,:] = S_t
+    R[t,:,:] = R_t
   end
 
   LL_t = 0.5*LL_t
   #LL = sum(LL_t)
 
-  return LL_t, Σ
+  return LL_t, S, R
 
 end
 

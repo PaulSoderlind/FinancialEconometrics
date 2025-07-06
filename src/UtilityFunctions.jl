@@ -183,10 +183,13 @@ end
 
 Compute correlation matrix from covariance matrix.
 
+  corMat = covMat./(s*s')
+
 """
-function CovToCor(covMat)
-  d      = diag(covMat)            #variances
-  corMat = covMat./sqrt.(d*d')
+function CovToCor(covMat,d0=nothing)
+  d = isnothing(d0) ? sqrt.(diag(covMat)) : d0    #standard deviations
+  #d      = diag(covMat)            #variances
+  corMat = covMat./(d*d')
   return corMat
 end
 

@@ -29,13 +29,13 @@ function GMMExactlyIdentified(GmmMomFn::Function,x,par0,m)
     par1 = Sol.zero
 
     g = GmmMomFn(par1,x)        #Tx2, moment conditions
-    S = CovNW(g,m,1)          #variance of sqrt(T)*gbar, NW with m lags
+    Σ = CovNW(g,m,1)          #variance of sqrt(T)*gbar, NW with m lags
 
-    D = jacobian(par->meanV(GmmMomFn(par,x)),par1)  #Numerical Jacobian
-    V = inv(D'inv(S)*D)/T
-    StdErr = sqrt.(diag(V))
+    D   = jacobian(par->meanV(GmmMomFn(par,x)),par1)  #Numerical Jacobian
+    V_T = inv(D'inv(Σ)*D)/T
+    StdErr = sqrt.(diag(V_T))
 
-    return par1, StdErr, V, S
+    return par1, StdErr, V_T, Σ
 
 end
 
@@ -71,17 +71,17 @@ function GMMgbarWgbar(GmmMomFn::Function,W,x,par0,m;SkipCovQ=false)
     par1 = Optim.minimizer(Sol)
 
     g = GmmMomFn(par1,x)        #Tx2, moment conditions
-    S = CovNW(g,m,1)          #variance of sqrt(T)*gbar, NW with m lags
+    Σ = CovNW(g,m,1)          #variance of sqrt(T)*gbar, NW with m lags
 
     if SkipCovQ
-        (D,V,StdErr) = (NaN,NaN,NaN)
+        (D,V_T,StdErr) = (NaN,NaN,NaN)
     else
-        D = jacobian(par->meanV(GmmMomFn(par,x)),par1)  #Numerical Jacobian
-        V = inv(D'W*D)*D'W*S*W'D*inv(D'W*D)/T
-        StdErr = sqrt.(diag(V))
+        D   = jacobian(par->meanV(GmmMomFn(par,x)),par1)  #Numerical Jacobian
+        V_T = inv(D'W*D)*D'W*Σ*W'D*inv(D'W*D)/T
+        StdErr = sqrt.(diag(V_T))
     end
 
-    return par1, StdErr, V, S, D
+    return par1, StdErr, V_T, Σ, D
 
 end
 
@@ -109,12 +109,12 @@ function GMMAgbar(GmmMomFn::Function,A,x,par0,m)
     par1 = Sol.zero
 
     g = GmmMomFn(par1,x)        #Tx2, moment conditions
-    S = CovNW(g,m,1)          #variance of sqrt(T)*gbar, NW with m lags
+    Σ = CovNW(g,m,1)          #variance of sqrt(T)*gbar, NW with m lags
 
-    D = jacobian(par->meanV(GmmMomFn(par,x)),par1)  #Numerical Jacobian
-    V = inv(A*D)*A*S*A'inv(A*D)'/T
-    StdErr = sqrt.(diag(V))
+    D   = jacobian(par->meanV(GmmMomFn(par,x)),par1)  #Numerical Jacobian
+    V_T = inv(A*D)*A*Σ*A'inv(A*D)'/T
+    StdErr = sqrt.(diag(V_T))
 
-    return par1, StdErr, V, S
+    return par1, StdErr, V_T, Σ
 
 end

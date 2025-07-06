@@ -1,0 +1,2 @@
+The notebook on OLS systems does a joint test of all intercepts 
+(in a regression of n different excess return series on a constant and the market excess return) being zero.

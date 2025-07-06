@@ -156,6 +156,7 @@ function VIF(X)
 
 end
 
+
 """
     DiagnosticsTable(X,u,R²,nlags,xNames="")
 
@@ -165,11 +166,10 @@ Compute and print a number of regression diagnostic tests.
 - `X::Matrix`:      Txk matrix of regressors
 - `u::Vector`:      T-vector of residuals
 - `R²::Float`:      the R² value
-- `nlags::Int`:     number of lags to use in autocorrelation test
 - `xNames::Vector`: of strings, regressor names
 
 """
-function DiagnosticsTable(X,u,R²,nlags,xNames="")
+function DiagnosticsTable(X,u,R²,xNames="")
 
   (T,k) = size(X)
 
@@ -179,26 +179,6 @@ function DiagnosticsTable(X,u,R²,nlags,xNames="")
   df = k - 1              #number of slope coefficients
   (RegrStat,pval) = OlsR2Test(R²,T,df)
   printmat([RegrStat,pval],rowNames=["stat","p-val"])
-
-  printblue("White's test (H₀: heteroskedasticity is not correlated with regressors)")
-  (WhiteStat,pval) = OlsWhitesTest(u,X)
-  printmat([WhiteStat,pval],rowNames=["stat","p-val"])
-
-  printblue("Testing autocorrelation of residuals (lag 1 to $nlags)")
-  (ρStats,BoxPierce,DW) = OlsAutoCorr(u,nlags)
-  printmat(ρStats,colNames=["autocorr","t-stat","p-val"],rowNames=1:nlags,cell00="lag")
-
-  printblue("BoxPierce ($nlags lags) ")
-  printmat(BoxPierce',rowNames=["stat","p-val"])
-
-  printblue("DW statistic")
-  printlnPs(DW,"\n")
-
-  for i = 1:k         #iterate over different regressors
-      ρStats, = OlsAutoCorr(X[:,i].*u,nlags)
-      printblue("Autocorrelations of $(xNames[i])*u  (lag 1 to $nlags)")
-      printmat(ρStats,colNames=["autocorr","t-stat","p-val"],rowNames=1:nlags,cell00="lag")
-  end
 
   printblue("Measures of fit")
   (R²adj,AIC,BIC)  = RegressionFit(u,R²,k)
@@ -215,6 +195,49 @@ function DiagnosticsTable(X,u,R²,nlags,xNames="")
   (maxVIF,allVIF) = VIF(X)
   printblue("VIF (checking multicollinearity)")
   printmat(allVIF;rowNames=xNames)
+
+  return nothing
+
+end
+
+
+"""
+    DiagnosticsNoniidTable(X,u,nlags,xNames="")
+
+Compute and print a number of tests for heteroskedasticity and autocorrelation
+
+### Input
+- `X::Matrix`:      Txk matrix of regressors
+- `u::Vector`:      T-vector of residuals
+- `nlags::Int`:     number of lags to use in autocorrelation test
+- `xNames::Vector`: of strings, regressor names
+
+"""
+function DiagnosticsNoniidTable(X,u,nlags,xNames="")
+
+  (T,k) = size(X)
+
+  isempty(xNames) && (xNames = [string("x",'₀'+i) for i=1:k])    #create rowNames
+
+  printblue("White's test (H₀: heteroskedasticity is not correlated with regressors)")
+  (WhiteStat,pval) = OlsWhitesTest(u,X)
+  printmat([WhiteStat,pval],rowNames=["stat","p-val"])
+
+  printblue("Testing autocorrelation of residuals (lag 1 to $nlags)")
+  (ρStats,BoxPierce,DW) = OlsAutoCorr(u,nlags)
+  printmat(ρStats,colNames=["autocorr","t-stat","p-val"],rowNames=1:nlags,cell00="lag")
+
+  printblue("BoxPierce ($nlags lags) ")
+  printmat(BoxPierce',rowNames=["stat","p-val"])
+
+  printblue("DW statistic")
+  printlnPs(DW,"\n")
+
+  for i in 1:k         #iterate over different regressors
+      ρStats, = OlsAutoCorr(X[:,i].*u,nlags)
+      printblue("Autocorrelations of $(xNames[i])*u  (lag 1 to $nlags)")
+      printmat(ρStats,colNames=["autocorr","t-stat","p-val"],rowNames=1:nlags,cell00="lag")
+  end
 
   return nothing
 

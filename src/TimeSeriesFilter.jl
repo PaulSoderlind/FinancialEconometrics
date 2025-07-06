@@ -68,7 +68,7 @@ function ARMAFilter(ϵ,rho=[],θ=[],θ₀=1,y₀=[])
 
   y = r > p ? [zeros(r-p);y₀;zeros(T)] : [y₀;zeros(T)]      #to store output in
 
-  for t = r+1:Tb
+  for t in r+1:Tb
       if p == 0                              #pure MA
         y[t] = dot(θ_ud,ϵ[t-q:t])
       else                                   #AR or ARMA
@@ -100,8 +100,8 @@ function VARFilter(ϵ,A,y₀)
     y     = [y₀;zeros(T,n)]
     ϵ     = [zeros(p,n);ϵ]
     Tb    = size(y,1)
-    for t = p+1:Tb               #loop over t
-        for s = 1:p              #loop over lags, y[t-1],y[t-2],...,y[t-p]
+    for t in p+1:Tb               #loop over t
+        for s in 1:p              #loop over lags, y[t-1],y[t-2],...,y[t-p]
             y[t,:] = y[t,:] + A[:,:,s]*y[t-s,:]
         end
         y[t,:] = y[t,:] + ϵ[t,:]
