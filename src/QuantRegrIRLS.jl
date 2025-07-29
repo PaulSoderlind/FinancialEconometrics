@@ -53,22 +53,22 @@ function QuantRegrIRLS(y,x,q=0.5;prec=1e-8,epsu=1e-6,maxiter=1000)
 
   res = y - x*b
 
-  D   = x'x/T
+  D   = x'x
   h   = 1.06*std(res)/T^0.2                        #Silverman (1986) recommendation
   fx  = exp.(-0.5*((res/h).^2))./(h*sqrt(2*pi))    #Green 7th ed, using N() kernel
   f0  = mean(fx)
-  C   = f0*x'x/T
+  C   = f0*x'x
   C_1 = inv(C)
-  vcv = q*(1-q)*C_1*D*C_1/T                         #variance-covariance matrix
+  vcv = q*(1-q)*C_1*D*C_1                           #variance-covariance matrix
 
-  C    = (fx.*x)'x/T                                #Wooldrige 2dn ed, Powell 1991
+  C    = (fx.*x)'x                                  #Wooldrige 2dn ed, Powell 1991
   C_1  = inv(C)                                     #but with Gaussian kernel
-  vcv2 = q*(1-q)*C_1*D*C_1/T                        #caputures (x,res) dependence
+  vcv2 = q*(1-q)*C_1*D*C_1                          #caputures (x,res) dependence
 
-  fx  = (abs.(res) .<= h/2)/h                       #Wooldrige 2nd ed, Powell 1991
-  C   = (fx.*x)'x/T                                 #uniform kernel
-  C_1 = inv(C)
-  vcv3 = q*(1-q)*C_1*D*C_1/T
+  fx   = (abs.(res) .<= h/2)/h                      #Wooldrige 2nd ed, Powell 1991
+  C    = (fx.*x)'x                                  #uniform kernel
+  C_1  = inv(C)
+  vcv3 = q*(1-q)*C_1*D*C_1
 
   return b, vcv, vcv2, vcv3
 

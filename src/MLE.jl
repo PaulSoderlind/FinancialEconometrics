@@ -21,8 +21,7 @@ The `LLtFun` should take `(par,y,x)` as inputs and generate a T-vector `LLt` as 
 """
 function MLE(LLtFun::Function,par0,y,x,lower=nothing,upper=nothing)
 
-    LL_t = LLtFun(par0,y,x)                       #trying the LLtFun
-    T    = length(LL_t)
+    T    = size(y,1)
 
     NoBounds = (isnothing(lower) && isnothing(upper)) || (all(!isfinite,lower) && all(!isfinite,upper))
 
@@ -32,6 +31,7 @@ function MLE(LLtFun::Function,par0,y,x,lower=nothing,upper=nothing)
         Sol = optimize(par->-sum(LLtFun(par,y,x)),lower,upper,par0)
     end
     parHat = Optim.converged(Sol) ? Optim.minimizer(Sol) : fill(NaN,length(par0))  #the optimal solution
+    LL_t = LLtFun(parHat,y,x)
 
     Ia = -hessian(par->mean(LLtFun(par,y,x)),parHat)   #2nd derivatives of mean(LLt)
     Ia       = (Ia+Ia')/2                            #to guarantee symmetry
@@ -46,6 +46,6 @@ function MLE(LLtFun::Function,par0,y,x,lower=nothing,upper=nothing)
     vcv       = inv(Ia) * J * inv(Ia)/T
     std_sandw = sqrt.(diag(vcv))                     #std from sandwich
 
-   return parHat, std_hess, std_grad, std_sandw
+   return parHat, std_hess, std_grad, std_sandw, LL_t
 
 end

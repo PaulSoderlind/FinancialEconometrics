@@ -204,5 +204,51 @@ Should give the same as `Distributions.logpdf(Normal(0,1),x)`
 function logpdfNorm(x)
     f = -0.5*log(2*π) - 0.5*x^2
     return f
+end
+
+
+"""
+    cdfNorm(x)
+
+Calculate Pr(z<=x) for N(0,1) variable z
+"""
+cdfNorm(x) = cdf(Normal(0,1),x)
+
+
+"""
+    ContingencyTable(x,y,xCat=[true,false],yCat=[true,false])
+
+A contingency table of x and y
+
+# Input
+- `x::Vector`:          T-vector with x-data
+- `y::Vector`:          T-vector with y-data
+- `xCat::Vector`:       nx-vector with x categories
+- `yCat::Vector`:       nz-vector with y categories
+
+# Output
+- `p::Matrix`:        contingency table
+- `cTab::Matrix`:     contingency table with frame (row and column sums)
+
+"""
+function ContingencyTable(x,y,xCat=[true,false],yCat=[true,false];DoRelativeQ=true)
+
+  N  = length(x)
+  nx = length(xCat)
+  ny = length(yCat)
+
+  p = zeros(Int,nx,ny)
+  for i in 1:nx, j in 1:ny
+    p[i,j] = sum( (x.==xCat[i]) .&&  (y.==yCat[j]) )
   end
+
+  rowSum = sum(p,dims=2)
+  colSum = sum(p,dims=1)
+  totSum = sum(p,dims=:)
+  cTab   = vcat(p,colSum)
+  cTab   = hcat(cTab,[vec(rowSum);totSum])
+
+  return p,cTab
+
+end
 
