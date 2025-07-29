@@ -33,7 +33,7 @@ This repository contains Julia code for a Financial Econometrics (MSc) course at
 
 # Relation to Other Julia Econometrics Codes
 
-The notebooks are closely tied to my lecture notes. The focus is on learning, so most methods are built from scratch. For instance, to estimate a GARCH model, the notebook builds the likelihood function, calls on a routine for optimisation (for the point estimates) and then differentiation (for the standard errors).
+The notebooks are closely tied to my lecture notes. The focus is on learning, so most methods are built from scratch. For instance, to estimate a GARCH model, the notebook builds the likelihood function, calls on a routine for optimisation (for the point estimates) and then differentiation (for the standard errors). Also, the code is structured to look similar to the methods described in the lecture notes, so it is not optimized for speed.
 
 See [Michael Creel's code](https://github.com/mcreel/Econometrics)
 for a similar approach (also focused on teaching)
